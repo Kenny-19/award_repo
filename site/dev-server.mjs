@@ -17,6 +17,12 @@ const types = { ".html": "text/html; charset=utf-8", ".png": "image/png" };
 
 createServer(async (req, res) => {
   const url = new URL(req.url, "http://localhost:8899");
+  // Test local uniquement : déplace le début de la révélation.
+  if (url.pathname === "/dev/debut") {
+    env.DEBUT_REVELATION = url.searchParams.get("date");
+    res.end(env.DEBUT_REVELATION);
+    return;
+  }
   if (url.pathname.startsWith("/api/")) {
     const morceaux = [];
     for await (const m of req) morceaux.push(m);

@@ -6,7 +6,7 @@
 <title>Agent de l'année 2026</title>
 <meta name="description" content="8 agents, 1 seul titre. Vote pour l'agent de l'année 2026.">
 <meta property="og:title" content="Qui sera l'agent de l'année ?">
-<meta property="og:description" content="8 agents, 1 seul titre. Résultats le vendredi 6 novembre 2026.">
+<meta property="og:description" content="8 agents, 1 seul titre. Votes jusqu'au samedi 7 novembre 2026 à 16 h.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,500&family=Jost:wght@400;500;600&display=swap">
 <style>
@@ -149,7 +149,7 @@
   <div class="page">
     <p class="label">Les nommés 2026</p>
     <h1>Agent de l'année</h1>
-    <p class="date" id="date">Révélation le vendredi 6 novembre 2026</p>
+    <p class="date" id="date">Votes jusqu'au samedi 7 novembre à 16 h · Le 1er dévoilé à 23 h</p>
   </div>
 </header>
 
@@ -167,20 +167,21 @@
       <div class="merci" id="merci" hidden>
         <h3>Vote reçu</h3>
         <p id="merci-texte"></p>
-        <p>Résultat officiel le vendredi 6 novembre 2026. D'ici là, ton agent a besoin de renforts.</p>
+        <p>Résultats samedi 7 novembre, du dernier au premier, à partir de 16 h. L'agent de l'année sera dévoilé à 23 h. D'ici là, ton agent a besoin de renforts.</p>
         <a class="bouton" id="partager" target="_blank" rel="noopener">Partager sur WhatsApp</a>
         <button class="bouton discret" id="copier">Copier le lien</button>
         <div id="direct-bloc" hidden>
           <h3>Classement en direct</h3>
-          <p class="intro">Mis à jour automatiquement. Une voix du public vaut 1 point. Le top 5 de chaque agent rapporte 10, 7, 5, 3 et 1 points.</p>
+          <p class="intro">Voix du public uniquement, mis à jour automatiquement. Le résultat final ajoute les points des agents et peut être très différent.</p>
           <div id="direct" style="margin-top:14px;border-top:1px solid var(--filet)"></div>
         </div>
       </div>
     </section>
 
     <section class="bloc" id="criteres">
-      <p class="label">Les critères</p>
-      <h2>Ce que le Service regarde</h2>
+      <p class="label">Comment choisir</p>
+      <h2>Tu ne les connais pas ? Parfait.</h2>
+      <p class="intro">Un bon agent reste un inconnu. Fie-toi à ce que le dossier laisse deviner.</p>
       <ul class="lignes" id="liste-criteres"></ul>
     </section>
 
@@ -189,12 +190,12 @@
   <main id="revelation" hidden>
     <section class="bloc">
       <p class="label">La révélation</p>
-      <h2 id="revel-titre">Le classement final</h2>
+      <h2 id="revel-titre">Du dernier au premier</h2>
       <p class="intro" id="revel-total"></p>
+      <p class="date" id="revel-prochaine"></p>
       <div id="revel-liste" style="margin-top:24px;border-top:1px solid var(--filet)"></div>
       <div class="revel-actions">
-        <button class="bouton" id="suivant"></button>
-        <button class="bouton discret" id="tout">Tout afficher</button>
+        <button class="bouton" id="animation" hidden>Revoir l'animation</button>
         <button class="bouton discret" id="gif" hidden>Télécharger l'animation en GIF</button>
       </div>
     </section>
@@ -210,25 +211,20 @@
 
 <script>
   const AGENTS = [
-    { numero: 1, nom: "Arsene Sefu", phrase: "Dossier épais, mais la moitié des pages a disparu. Personne ne sait pourquoi." },
-    { numero: 2, nom: "Audrey Audra", phrase: "Deux fois le même nom, au cas où le premier serait découvert." },
-    { numero: 3, nom: "Jean Mkb", phrase: "Trois lettres pour tout nom de famille. Le reste est classé secret." },
-    { numero: 4, nom: "jenokal_31", phrase: "Nom de code officiel. Personne ne sait ce que veut dire le 31, et c'est voulu." },
-    { numero: 5, nom: "Jess Kb", phrase: "Aussi connu sous le nom de « le mari de Wendy ». La couverture parfaite." },
-    { numero: 6, nom: "Kenny", phrase: "Un seul nom et aucune adresse connue. Le Service cherche encore." },
-    { numero: 7, nom: "Lionel", phrase: "Le dossier tient en un mot : Lionel. Le Service trouve ça suspect." },
-    { numero: 8, nom: "Wilfried Musanzi", phrase: "Le nom complet figure au dossier. C'est le seul détail confirmé." },
+    { numero: 1, nom: "Arsene Sefu", phrase: "Lewis Hamilton le Parisien" },
+    { numero: 2, nom: "Audrey Audra", phrase: "Aventurier ++" },
+    { numero: 3, nom: "Jean Mkb", phrase: "L'homme à femmes, « askip »" },
+    { numero: 4, nom: "jenokal_31", phrase: "Le wewa" },
+    { numero: 5, nom: "Jess Kb", phrase: "Le mari de Wendy" },
+    { numero: 6, nom: "Kenny", phrase: "Le mari du médecin" },
+    { numero: 7, nom: "Lionel", phrase: "Le bord de la fille de droit" },
+    { numero: 8, nom: "Wilfried Musanzi", phrase: "L'homme de Nsasi" },
   ];
   const CRITERES = [
-    ["Licence de tuer", "La blague qui ressort encore des mois après."],
-    ["Chantage et archives", "La photo si gênante que la cible supplie de la supprimer."],
-    ["Présence sur le terrain", "Venir aux sorties de 2026, et pas « en route » depuis son lit."],
-    ["Scandale d'État", "L'histoire qui commence encore par « tu te rappelles quand... »"],
-    ["Couverture bidon", "La qualité des excuses pour ne pas venir."],
-    ["Budget du Service", "Où était l'agent quand l'addition est arrivée ?"],
-    ["Transmission cryptée", "Les vocaux de 6 minutes et les messages que personne ne comprend."],
-    ["Arsenal de stickers", "Le sticker parfait, envoyé en moins de 10 secondes."],
-    ["Tenue de mission", "James Bond, ou habillé dans le noir ? Les photos font foi."],
+    ["Le nom de code", "Lequel sonne le plus comme un vrai agent ?"],
+    ["Le dossier", "Quelle phrase te donne envie d'en savoir plus ?"],
+    ["La mission", "À qui confierais-tu une mission impossible ?"],
+    ["Ton instinct", "Pas d'argument ? Suis ton flair, c'est aussi ça, le renseignement."],
   ];
   const CLE = "agent-annee-vote";
   const $ = (id) => document.getElementById(id);
@@ -306,7 +302,7 @@
         return element("div", { className: "rang" },
           element("b", { textContent: nomRang(c.rang) + (egalite ? " ex æquo" : "") }),
           element("strong", { textContent: c.nom }),
-          element("span", { textContent: nbPoints(c.points) }));
+          element("span", { textContent: nbVoix(c.voix) }));
       }));
     } catch {
       // On garde le dernier classement affiché et on réessaie au prochain passage.
@@ -355,6 +351,8 @@
 
   const nomRang = (r) => (r === 1 ? "1er" : r + "e");
   const nbPoints = (n) => n + (n > 1 ? " points" : " point");
+  const nbVoix = (n) => n + " voix";
+  const heureLubumbashi = (iso) => new Date(iso).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit", timeZone: "Africa/Lubumbashi" }).replace(":00", " h").replace(":", " h ") + " (heure de Lubumbashi)";
 
   // Paillettes d'or qui tombent derrière le nom du gagnant.
   function paillettes(canvas) {
@@ -720,55 +718,72 @@
   function revelation(d) {
     $("contenu").hidden = true;
     $("revelation").hidden = false;
-    $("date").textContent = "Vendredi 6 novembre 2026";
-    $("revel-total").textContent = "Une voix du public vaut 1 point. Le top 5 de chaque agent rapporte 10, 7, 5, 3 et 1 points.";
-    const egalite = (c) => d.classement.filter((x) => x.rang === c.rang).length > 1;
-    // On part du dernier : le classement arrive trié du meilleur au moins bon.
-    const ordre = [...d.classement].reverse();
-    let etape = 0;
+    $("date").textContent = "Samedi 7 novembre 2026";
+    $("revel-total").textContent = "Les votes sont fermés. Une voix du public vaut 1 point. Le top 5 de chaque agent rapporte 10, 7, 5, 3 et 1 points.";
+    let nbAffiches = 0;
+    let gagnants = [];
+    let minuteur = null;
 
-    function bouton() {
-      if (etape >= ordre.length) {
-        $("suivant").hidden = true;
-        $("tout").hidden = true;
-        $("gif").hidden = false;
-        return;
-      }
-      const c = ordre[etape];
-      $("suivant").textContent = c.rang === 1 ? "Révéler l'agent de l'année" : `Révéler la ${nomRang(c.rang)} place`;
-    }
-    function suivant() {
-      const c = ordre[etape++];
+    function afficher(c) {
       const noeud = c.rang === 1
         ? element("div", { className: "gagnant apparait" },
             silhouette(),
-            element("p", { className: "label", textContent: egalite(c) ? "Agent de l'année, ex æquo" : "Agent de l'année 2026" }),
+            element("p", { className: "label", textContent: c.egalite ? "Agent de l'année, ex æquo" : "Agent de l'année 2026" }),
             element("strong", { textContent: c.nom }),
             element("p", { textContent: nbPoints(c.points) }))
         : element("div", { className: "rang apparait" },
-            element("b", { textContent: nomRang(c.rang) + (egalite(c) ? " ex æquo" : "") }),
+            element("b", { textContent: nomRang(c.rang) + (c.egalite ? " ex æquo" : "") }),
             element("strong", { textContent: c.nom }),
             element("span", { textContent: nbPoints(c.points) }));
       $("revel-liste").prepend(noeud);
-      bouton();
     }
-    $("suivant").addEventListener("click", () => {
-      if (ordre[etape].rang !== 1) { suivant(); return; }
-      // Les ex æquo à la 1re place sont sacrés ensemble.
-      const gagnants = ordre.slice(etape);
-      while (etape < ordre.length) suivant();
-      sacre(gagnants);
-    });
-    $("tout").addEventListener("click", () => { while (etape < ordre.length) suivant(); });
-    $("gif").addEventListener("click", () => telechargerGif(d.classement.filter((c) => c.rang === 1), $("gif")));
-    bouton();
+
+    function mettreAJour(etat, premierAffichage) {
+      etat.classement.slice(nbAffiches).forEach(afficher);
+      nbAffiches = etat.classement.length;
+      $("revel-prochaine").textContent = etat.prochaine ? `Prochaine révélation à ${heureLubumbashi(etat.prochaine)}.` : "";
+      const nouveaux = etat.classement.filter((c) => c.rang === 1);
+      if (nouveaux.length && !gagnants.length) {
+        gagnants = nouveaux;
+        $("revel-prochaine").hidden = true;
+        $("animation").hidden = false;
+        $("gif").hidden = false;
+        // L'animation se lance seule pour ceux qui attendaient devant la page.
+        if (!premierAffichage) sacre(gagnants);
+      }
+      if (etat.termine) clearInterval(minuteur);
+    }
+
+    $("animation").addEventListener("click", () => sacre(gagnants));
+    $("gif").addEventListener("click", () => telechargerGif(gagnants, $("gif")));
+    mettreAJour(d, true);
+    if (!d.termine) {
+      minuteur = setInterval(async () => {
+        if (document.hidden) return;
+        try {
+          mettreAJour(await fetch("/api/etat").then((r) => r.json()), false);
+        } catch {
+          // Pas grave : on réessaie au prochain passage.
+        }
+      }, 30000);
+    }
   }
 
   fetch("/api/etat")
     .then((r) => r.json())
     .then((d) => {
-      if (d.revele) revelation(d);
-      else if (memoire()) afficherMerci(memoire());
+      if (d.revele) { revelation(d); return; }
+      if (memoire()) afficherMerci(memoire());
+      // Sans vote, la page n'a pas de classement à suivre : elle surveille juste le début.
+      const attente = setInterval(async () => {
+        if (document.hidden) return;
+        try {
+          const e = await fetch("/api/etat").then((r) => r.json());
+          if (e.revele) { clearInterval(attente); location.reload(); }
+        } catch {
+          // Pas grave : on réessaie au prochain passage.
+        }
+      }, 60000);
     })
     .catch(() => { if (memoire()) afficherMerci(memoire()); });
 </script>

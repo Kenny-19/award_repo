@@ -72,10 +72,15 @@
 
   <section id="fait" hidden>
     <h2>Bulletin enregistré</h2>
-    <p class="doux">Les lauréats des prix spéciaux seront révélés le vendredi 6 novembre 2026.</p>
+    <p class="doux">Samedi 7 novembre : les votes ferment à 16 h, puis un agent est révélé chaque heure, jusqu'au 1er à 23 h. Les lauréats des prix spéciaux arrivent ici à 23 h.</p>
     <h2>Classement en direct</h2>
-    <p class="doux">Agent de l'année. Mis à jour automatiquement.</p>
+    <p class="doux">Voix du public uniquement, mis à jour automatiquement. Les points des agents restent secrets.</p>
     <ul class="lignes" id="direct"></ul>
+  </section>
+
+  <section id="attente" hidden>
+    <h2>Les votes sont fermés</h2>
+    <p class="doux">La révélation est en cours sur la page Agent de l'année. Les lauréats des prix spéciaux arrivent ici à 23 h.</p>
   </section>
 
   <section id="laureats-bloc" hidden>
@@ -85,6 +90,11 @@
 
   <p id="message" role="status"></p>
 
+  <section id="criteres-bloc" hidden>
+    <h2>Les critères entre agents</h2>
+    <ul class="lignes" id="criteres"></ul>
+  </section>
+
   <section id="actions" hidden>
     <a class="bouton discret" href="/" id="vers-public">Voir la page Agent de l'année</a>
     <button class="discret" id="sortir">Sortir de l'espace agents</button>
@@ -92,6 +102,17 @@
 </main>
 <script>
   const BAREME = [10, 7, 5, 3, 1];
+  const CRITERES = [
+    ["Licence de tuer", "La blague qui ressort encore des mois après."],
+    ["Chantage et archives", "La photo si gênante que la cible supplie de la supprimer."],
+    ["Présence sur le terrain", "Venir aux sorties de 2026, et pas « en route » depuis son lit."],
+    ["Scandale d'État", "L'histoire qui commence encore par « tu te rappelles quand... »"],
+    ["Couverture bidon", "La qualité des excuses pour ne pas venir."],
+    ["Budget du Service", "Où était l'agent quand l'addition est arrivée ?"],
+    ["Transmission cryptée", "Les vocaux de 6 minutes et les messages que personne ne comprend."],
+    ["Arsenal de stickers", "Le sticker parfait, envoyé en moins de 10 secondes."],
+    ["Tenue de mission", "James Bond, ou habillé dans le noir ? Les photos font foi."],
+  ];
   const DESCRIPTIONS = {
     dossier: "La meilleure photo gênante ressortie des archives.",
     comique: "La blague de l'année.",
@@ -124,7 +145,7 @@
 
   function montrerEntree(message = "") {
     $("titre").textContent = "Entre ton code";
-    for (const id of ["bulletin-bloc", "fait", "laureats-bloc", "actions"]) $(id).hidden = true;
+    for (const id of ["bulletin-bloc", "fait", "attente", "laureats-bloc", "criteres-bloc", "actions"]) $(id).hidden = true;
     $("entree").hidden = false;
     $("message").textContent = message;
   }
@@ -196,7 +217,7 @@
         const nom = document.createElement("strong");
         nom.textContent = `${c.rang === 1 ? "1er" : c.rang + "e"}${egalite ? " ex æquo" : ""} · ${c.nom}`;
         const points = document.createElement("span");
-        points.textContent = c.points + (c.points > 1 ? " points" : " point");
+        points.textContent = c.voix + " voix";
         li.append(nom, points);
         return li;
       }));
@@ -218,12 +239,14 @@
     $("entree").hidden = true;
     $("message").textContent = "";
     $("actions").hidden = false;
+    $("criteres-bloc").hidden = d.ferme;
     $("bulletin-bloc").hidden = d.ferme || d.deja;
     $("fait").hidden = d.ferme || !d.deja;
-    $("laureats-bloc").hidden = !d.ferme;
+    $("attente").hidden = !d.ferme || d.termine;
+    $("laureats-bloc").hidden = !d.termine;
     if (!d.ferme && !d.deja) remplirBulletin(d);
     if (!d.ferme && d.deja) demarrerDirect();
-    if (d.ferme) {
+    if (d.termine) {
       $("laureats").replaceChildren(...d.laureats.map((p) => {
         const li = document.createElement("li");
         const nom = document.createElement("strong");
@@ -285,6 +308,16 @@
     $("code").value = "";
     montrerEntree();
   });
+
+  $("criteres").replaceChildren(...CRITERES.map(([titre, texte]) => {
+    const li = document.createElement("li");
+    const nom = document.createElement("strong");
+    nom.textContent = titre;
+    const detail = document.createElement("span");
+    detail.textContent = texte;
+    li.append(nom, detail);
+    return li;
+  }));
 
   const enregistre = memoire();
   if (enregistre) entrer(enregistre);

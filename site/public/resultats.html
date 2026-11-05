@@ -83,10 +83,12 @@
       revele = d.revele;
       $("message").textContent = "";
       $("etat").textContent = revele
-        ? "La révélation est publique : le vote est fermé."
-        : "Les résultats sont cachés : le vote est ouvert.";
-      $("reveler").textContent = revele ? "Cacher à nouveau les résultats" : "Lancer la révélation";
-      $("confirmer").textContent = revele ? "Oui, cacher et rouvrir le vote" : "Oui, tout révéler et fermer le vote";
+        ? "Tout a été révélé manuellement : le vote est fermé."
+        : d.etape > 0
+          ? `Révélation automatique en cours : ${d.etape} étape(s) sur 8, le vote est fermé.`
+          : "Le vote est ouvert. La révélation démarre seule samedi à 16 h, le 1er à 23 h (heure de Lubumbashi).";
+      $("reveler").textContent = revele ? "Annuler la révélation manuelle" : "Tout révéler maintenant (secours)";
+      $("confirmer").textContent = revele ? "Oui, annuler la révélation manuelle" : "Oui, tout révéler et fermer le vote";
       $("reveler").hidden = false;
       $("confirmer").hidden = true;
       $("annuler").hidden = true;

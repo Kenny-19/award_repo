@@ -50,7 +50,25 @@ async function lireCorps(request) {
   }
 }
 
-const estRevele = async (store) => (await store.get(CLE_REVELE)) === "oui";
+// Samedi 7 novembre, heure de Lubumbashi : le 8e à 16 h, puis un agent par heure, le 1er à 23 h.
+const DEBUT_REVELATION = "2026-11-07T16:00:00+02:00";
+const UNE_HEURE = 60 * 60 * 1000;
+const NB_ETAPES = 8;
+
+// Le drapeau sert de secours : il permet de tout révéler d'un coup depuis la page de contrôle.
+async function progression(store, env) {
+  const force = (await store.get(CLE_REVELE)) === "oui";
+  const debut = Date.parse(env.DEBUT_REVELATION || DEBUT_REVELATION);
+  const ecoule = Date.now() - debut;
+  const etape = force ? NB_ETAPES : ecoule < 0 ? 0 : Math.min(NB_ETAPES, Math.floor(ecoule / UNE_HEURE) + 1);
+  return {
+    force,
+    etape,
+    ferme: etape > 0,
+    termine: etape >= NB_ETAPES,
+    prochaine: etape < NB_ETAPES ? new Date(debut + etape * UNE_HEURE).toISOString() : null,
+  };
+}
 
 async function cleValide(cle, env) {
   return Boolean(env.RESULTATS_CLE) && (await sha256(String(cle ?? ""))) === (await sha256(env.RESULTATS_CLE));
@@ -130,7 +148,7 @@ async function prixSpeciaux(store) {
 }
 
 async function vote(request, store, env) {
-  if (await estRevele(store)) return json(403, { code: "ferme", erreur: "Le vote est terminé." });
+  if ((await progression(store, env)).ferme) return json(403, { code: "ferme", erreur: "Le vote est terminé." });
 
   const cookies = request.headers.get("cookie") || "";
   if (cookies.split(/;\s*/).some((c) => c.startsWith(`${COOKIE}=`))) {
@@ -157,14 +175,22 @@ async function vote(request, store, env) {
   });
 }
 
-async function etat(store) {
-  if (!(await estRevele(store))) return json(200, { revele: false });
-  // Version publique : le classement seulement. Les prix spéciaux restent dans l'espace agents.
+async function etat(store, env) {
+  const p = await progression(store, env);
+  if (!p.ferme) return json(200, { revele: false, prochaine: p.prochaine });
+  // Version publique : seulement les agents déjà révélés. Rien d'autre ne quitte le serveur.
+  // Du dernier au premier, une place par étape. Les ex æquo à la 1re place arrivent ensemble à la fin.
   const liste = await classement(store);
-  return json(200, {
-    revele: true,
-    classement: liste.map(({ nom, points, rang }) => ({ nom, points, rang })),
-  });
+  const visibles = [...liste]
+    .reverse()
+    .filter((c, i) => (c.rang === 1 ? NB_ETAPES - 1 : i) < p.etape)
+    .map(({ nom, points, rang }) => ({
+      nom,
+      points,
+      rang,
+      egalite: liste.filter((x) => x.rang === rang).length > 1,
+    }));
+  return json(200, { revele: true, etape: p.etape, termine: p.termine, prochaine: p.prochaine, classement: visibles });
 }
 
 // Un bulletin envoyé avant l'ajout de l'Agent de l'année peut encore être complété.
@@ -176,14 +202,15 @@ async function bulletinComplet(store, numero) {
 async function groupeVerifier(request, store, env) {
   const agent = await agentDuCode((await lireCorps(request)).code, env);
   if (!agent) return json(401, { erreur: "Ce code n'est pas valide." });
-  const ferme = await estRevele(store);
+  const { ferme, termine } = await progression(store, env);
   return json(200, {
     agent,
     agents: AGENTS,
     prix: PRIX,
     deja: await bulletinComplet(store, agent.numero),
     ferme,
-    laureats: ferme ? (await prixSpeciaux(store)).prix : [],
+    termine,
+    laureats: termine ? (await prixSpeciaux(store)).prix : [],
   });
 }
 
@@ -196,10 +223,15 @@ async function direct(request, store, env) {
     autorise = Boolean(agent) && (await bulletinComplet(store, agent.numero));
   }
   if (!autorise) return json(403, { erreur: "Vote d'abord pour voir le classement." });
-  const liste = await classement(store);
+  const { ferme } = await progression(store, env);
+  if (ferme) return json(200, { revele: true, classement: [] });
+  // Le direct ne montre que les voix du public : les points des agents restent secrets.
+  const liste = (await classement(store))
+    .map(({ nom, public: voix }) => ({ nom, voix }))
+    .sort((a, b) => b.voix - a.voix);
   return json(200, {
-    revele: await estRevele(store),
-    classement: liste.map(({ nom, points, rang }) => ({ nom, points, rang })),
+    revele: false,
+    classement: liste.map((c) => ({ ...c, rang: 1 + liste.filter((x) => x.voix > c.voix).length })),
   });
 }
 
@@ -207,7 +239,7 @@ async function groupeVote(request, store, env) {
   const { code, choix } = await lireCorps(request);
   const agent = await agentDuCode(code, env);
   if (!agent) return json(401, { erreur: "Ce code n'est pas valide." });
-  if (await estRevele(store)) return json(403, { code: "ferme", erreur: "Le vote est terminé." });
+  if ((await progression(store, env)).ferme) return json(403, { code: "ferme", erreur: "Le vote est terminé." });
   if (await bulletinComplet(store, agent.numero)) {
     return json(409, { code: "deja_vote", erreur: "Ton bulletin est déjà enregistré." });
   }
@@ -247,8 +279,11 @@ async function resultats(request, store, env) {
   }
   const liste = await classement(store);
   const { prix, bulletins } = await prixSpeciaux(store);
+  const p = await progression(store, env);
   return json(200, {
-    revele: await estRevele(store),
+    revele: p.force,
+    etape: p.etape,
+    prochaine: p.prochaine,
     total: liste.reduce((somme, c) => somme + c.public, 0),
     classement: liste,
     prix,
@@ -265,7 +300,7 @@ async function reveler(request, store, env) {
 
 export async function handleApi(request, store, env) {
   const { pathname } = new URL(request.url);
-  if (pathname === "/api/etat" && request.method === "GET") return etat(store);
+  if (pathname === "/api/etat" && request.method === "GET") return etat(store, env);
   if (request.method !== "POST") return json(405, { erreur: "Méthode non autorisée." });
   switch (pathname) {
     case "/api/vote": return vote(request, store, env);
