@@ -90,9 +90,9 @@
       $("reveler").hidden = false;
       $("confirmer").hidden = true;
       $("annuler").hidden = true;
-      $("titre-classement").textContent = `Agent de l'année : ${d.total} vote(s)`;
+      $("titre-classement").textContent = `Agent de l'année : ${d.total} vote(s) du public`;
       $("titre-prix").textContent = `Prix spéciaux : ${d.bulletins} bulletin(s) sur 8`;
-      $("classement").replaceChildren(...d.classement.map((c) => ligne(`${c.rang}. ${c.nom}`, `${c.votes} vote(s)`)));
+      $("classement").replaceChildren(...d.classement.map((c) => ligne(`${c.rang}. ${c.nom}`, `${c.points} pts (public ${c.public}, agents ${c.agents})`)));
       $("prix").replaceChildren(...d.prix.map((p) => ligne(p.nom, p.gagnants.join(", ") || "Aucun vote")));
       $("detail").hidden = false;
     } catch (erreur) {

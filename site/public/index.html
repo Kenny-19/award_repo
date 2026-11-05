@@ -316,7 +316,7 @@
   });
 
   const nomRang = (r) => (r === 1 ? "1er" : r + "e");
-  const nbVotes = (n) => n + (n > 1 ? " votes" : " vote");
+  const nbPoints = (n) => n + (n > 1 ? " points" : " point");
 
   // Paillettes d'or qui tombent derrière le nom du gagnant.
   function paillettes(canvas) {
@@ -583,7 +583,7 @@
     }));
     const scene = {
       intro: gagnants.length > 1 ? "Les agents de l'année 2026 sont" : "L'agent de l'année 2026 est",
-      votes: nbVotes(gagnants[0].votes),
+      votes: nbPoints(gagnants[0].points),
       nom, eclats, fin,
     };
 
@@ -660,7 +660,7 @@
       element("p", { className: "label sacre-intro", textContent: gagnants.length > 1 ? "Les agents de l'année 2026 sont" : "L'agent de l'année 2026 est" }),
       agent,
       nom,
-      element("p", { className: "sacre-votes", textContent: nbVotes(gagnants[0].votes) }),
+      element("p", { className: "sacre-votes", textContent: nbPoints(gagnants[0].points) }),
       fermer,
       gif,
     );
@@ -683,7 +683,7 @@
     $("contenu").hidden = true;
     $("revelation").hidden = false;
     $("date").textContent = "Vendredi 6 novembre 2026";
-    $("revel-total").textContent = nbVotes(d.total) + " au total.";
+    $("revel-total").textContent = "Une voix du public vaut 1 point. Le top 5 de chaque agent rapporte 10, 7, 5, 3 et 1 points.";
     const egalite = (c) => d.classement.filter((x) => x.rang === c.rang).length > 1;
     // On part du dernier : le classement arrive trié du meilleur au moins bon.
     const ordre = [...d.classement].reverse();
@@ -706,11 +706,11 @@
             silhouette(),
             element("p", { className: "label", textContent: egalite(c) ? "Agent de l'année, ex æquo" : "Agent de l'année 2026" }),
             element("strong", { textContent: c.nom }),
-            element("p", { textContent: nbVotes(c.votes) }))
+            element("p", { textContent: nbPoints(c.points) }))
         : element("div", { className: "rang apparait" },
             element("b", { textContent: nomRang(c.rang) + (egalite(c) ? " ex æquo" : "") }),
             element("strong", { textContent: c.nom }),
-            element("span", { textContent: nbVotes(c.votes) }));
+            element("span", { textContent: nbPoints(c.points) }));
       $("revel-liste").prepend(noeud);
       bouton();
     }

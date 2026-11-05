@@ -21,6 +21,8 @@ export const PRIX = [
   { id: "retard", nom: "Agent Toujours en Retard", autoVote: false },
 ];
 
+const BAREME = [10, 7, 5, 3, 1];
+
 const COOKIE = "agent_annee_vote";
 const UN_AN = 60 * 60 * 24 * 365;
 // Assez haut pour les réseaux mobiles, où beaucoup de gens partagent la même adresse IP.
@@ -76,17 +78,42 @@ async function agentDuCode(code, env) {
   return null;
 }
 
+async function lireBulletins(store) {
+  const cles = await store.list("bulletins/");
+  return Promise.all(cles.map(async (k) => JSON.parse(await store.get(k))));
+}
+
+// Une voix du public vaut 1 point. Le top 5 de chaque agent rapporte les points du barème.
+// Égalité : le plus de 1res places d'agents, puis de 2es places. Sinon, ex æquo.
 async function classement(store) {
+  const tops = (await lireBulletins(store)).map((b) => b.annee).filter(Array.isArray);
   const comptes = await Promise.all(
-    AGENTS.map(async (a) => ({ nom: a.nom, votes: (await store.list(`votes/${a.numero}/`)).length })),
+    AGENTS.map(async (a) => {
+      const pub = (await store.list(`votes/${a.numero}/`)).length;
+      const agents = tops.reduce((somme, top) => somme + (BAREME[top.indexOf(a.numero)] ?? 0), 0);
+      return {
+        nom: a.nom,
+        points: pub + agents,
+        public: pub,
+        agents,
+        premieres: tops.filter((top) => top[0] === a.numero).length,
+        deuxiemes: tops.filter((top) => top[1] === a.numero).length,
+      };
+    }),
   );
-  comptes.sort((a, b) => b.votes - a.votes);
-  return comptes.map((c) => ({ ...c, rang: 1 + comptes.filter((x) => x.votes > c.votes).length }));
+  const ecart = (a, b) => b.points - a.points || b.premieres - a.premieres || b.deuxiemes - a.deuxiemes;
+  comptes.sort(ecart);
+  return comptes.map((c) => ({
+    nom: c.nom,
+    points: c.points,
+    public: c.public,
+    agents: c.agents,
+    rang: 1 + comptes.filter((x) => ecart(c, x) > 0).length,
+  }));
 }
 
 async function prixSpeciaux(store) {
-  const cles = await store.list("bulletins/");
-  const bulletins = await Promise.all(cles.map(async (k) => JSON.parse(await store.get(k))));
+  const bulletins = await lireBulletins(store);
   const prix = PRIX.map((p) => {
     const voix = AGENTS.map((a) => ({
       nom: a.nom,
@@ -136,9 +163,14 @@ async function etat(store) {
   const liste = await classement(store);
   return json(200, {
     revele: true,
-    total: liste.reduce((somme, c) => somme + c.votes, 0),
-    classement: liste,
+    classement: liste.map(({ nom, points, rang }) => ({ nom, points, rang })),
   });
+}
+
+// Un bulletin envoyé avant l'ajout de l'Agent de l'année peut encore être complété.
+async function bulletinComplet(store, numero) {
+  const texte = await store.get(`bulletins/${numero}`);
+  return texte !== null && Array.isArray(JSON.parse(texte).annee);
 }
 
 async function groupeVerifier(request, store, env) {
@@ -149,7 +181,7 @@ async function groupeVerifier(request, store, env) {
     agent,
     agents: AGENTS,
     prix: PRIX,
-    deja: (await store.get(`bulletins/${agent.numero}`)) !== null,
+    deja: await bulletinComplet(store, agent.numero),
     ferme,
     laureats: ferme ? (await prixSpeciaux(store)).prix : [],
   });
@@ -160,11 +192,24 @@ async function groupeVote(request, store, env) {
   const agent = await agentDuCode(code, env);
   if (!agent) return json(401, { erreur: "Ce code n'est pas valide." });
   if (await estRevele(store)) return json(403, { code: "ferme", erreur: "Le vote est terminé." });
-  if ((await store.get(`bulletins/${agent.numero}`)) !== null) {
+  if (await bulletinComplet(store, agent.numero)) {
     return json(409, { code: "deja_vote", erreur: "Ton bulletin est déjà enregistré." });
   }
 
-  const bulletin = {};
+  const annee = choix?.annee;
+  if (
+    !Array.isArray(annee) ||
+    annee.length !== BAREME.length ||
+    new Set(annee).size !== BAREME.length ||
+    !annee.every((n) => AGENTS.some((a) => a.numero === n))
+  ) {
+    return json(400, { erreur: "Classe 5 agents différents pour l'Agent de l'année." });
+  }
+  if (annee.includes(agent.numero)) {
+    return json(400, { erreur: "Tu ne peux pas te classer toi-même à l'Agent de l'année." });
+  }
+
+  const bulletin = { annee };
   for (const p of PRIX) {
     const candidat = choix?.[p.id];
     if (!AGENTS.some((a) => a.numero === candidat)) {
@@ -188,7 +233,7 @@ async function resultats(request, store, env) {
   const { prix, bulletins } = await prixSpeciaux(store);
   return json(200, {
     revele: await estRevele(store),
-    total: liste.reduce((somme, c) => somme + c.votes, 0),
+    total: liste.reduce((somme, c) => somme + c.public, 0),
     classement: liste,
     prix,
     bulletins,

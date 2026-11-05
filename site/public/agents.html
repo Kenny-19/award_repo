@@ -61,8 +61,8 @@
 
   <section id="bulletin-bloc" hidden>
     <div>
-      <h2>Les prix spéciaux</h2>
-      <p class="doux">Une personne par prix. Tu ne peux voter pour toi qu'à la Mission Échouée. Ton bulletin est définitif.</p>
+      <h2>Ton bulletin</h2>
+      <p class="doux">Ton top 5 de l'Agent de l'année, sans toi, puis une personne par prix spécial. Tu ne peux voter pour toi qu'à la Mission Échouée. Ton bulletin est définitif.</p>
     </div>
     <form id="bulletin">
       <div id="prix"></div>
@@ -72,7 +72,7 @@
 
   <section id="fait" hidden>
     <h2>Bulletin enregistré</h2>
-    <p class="doux">Les lauréats s'afficheront ici le vendredi 6 novembre 2026.</p>
+    <p class="doux">L'Agent de l'année et les lauréats seront révélés le vendredi 6 novembre 2026.</p>
   </section>
 
   <section id="laureats-bloc" hidden>
@@ -88,6 +88,7 @@
   </section>
 </main>
 <script>
+  const BAREME = [10, 7, 5, 3, 1];
   const DESCRIPTIONS = {
     dossier: "La meilleure photo gênante ressortie des archives.",
     comique: "La blague de l'année.",
@@ -127,6 +128,34 @@
 
   function remplirBulletin(d) {
     $("prix").replaceChildren();
+    const titreTop = document.createElement("h2");
+    titreTop.textContent = "Agent de l'année";
+    $("prix").append(titreTop);
+    const selectsTop = [];
+    BAREME.forEach((points, i) => {
+      const select = document.createElement("select");
+      select.id = "top-" + i;
+      select.required = true;
+      select.append(new Option("Choisir un agent", ""));
+      for (const a of d.agents) {
+        if (a.numero !== d.agent.numero) select.append(new Option(a.nom, a.numero));
+      }
+      // Un agent déjà classé n'est plus proposé aux autres places.
+      select.addEventListener("change", () => {
+        for (const s of selectsTop) {
+          const autres = selectsTop.filter((x) => x !== s).map((x) => x.value).filter(Boolean);
+          for (const o of s.options) o.disabled = Boolean(o.value) && autres.includes(o.value);
+        }
+      });
+      selectsTop.push(select);
+      const label = document.createElement("label");
+      label.htmlFor = select.id;
+      label.append(`${i === 0 ? "1er" : i + 1 + "e"} : ${points} ${points > 1 ? "points" : "point"}`, select);
+      $("prix").append(label);
+    });
+    const titrePrix = document.createElement("h2");
+    titrePrix.textContent = "Prix spéciaux";
+    $("prix").append(titrePrix);
     for (const p of d.prix) {
       const select = document.createElement("select");
       select.id = "prix-" + p.id;
@@ -193,7 +222,7 @@
 
   $("bulletin").addEventListener("submit", async (e) => {
     e.preventDefault();
-    const choix = {};
+    const choix = { annee: BAREME.map((_, i) => Number($("top-" + i).value)) };
     for (const p of infos.prix) choix[p.id] = Number($("prix-" + p.id).value);
     $("envoyer").disabled = true;
     $("message").textContent = "Envoi...";
