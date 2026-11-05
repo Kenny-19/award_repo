@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Agent de l'année 2026 – Vote</title>
+<style>
+  :root { --or: #f4c22b; --noir: #0d0c0a; --rouge: #d42a1c; --blanc: #fffaf0; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1080px; height: 1350px; overflow: hidden; background: var(--or); }
+  main {
+    position: relative;
+    width: 1080px; height: 1350px;
+    display: flex; flex-direction: column;
+    background: var(--or);
+    color: var(--noir);
+    font-family: "Avenir Next Condensed", sans-serif;
+  }
+
+  .haut {
+    position: relative;
+    height: 580px;
+    padding: 52px 48px 0;
+    overflow: hidden;
+  }
+  .surtitre {
+    display: inline-block;
+    padding: 9px 16px 8px;
+    background: var(--noir);
+    color: var(--or);
+    font-weight: 700;
+    font-size: 27px;
+    line-height: 1;
+    letter-spacing: .12em;
+  }
+  h1 {
+    position: relative;
+    z-index: 1;
+    margin-top: 26px;
+    font-weight: 800;
+    text-transform: uppercase;
+    line-height: .86;
+    letter-spacing: -.012em;
+  }
+  h1 .petit { display: block; font-size: 88px; line-height: 1; }
+  h1 .grand { display: block; font-size: 200px; }
+  h1 .moyen { display: block; margin-top: 12px; font-size: 122px; }
+
+  .silhouette {
+    position: absolute;
+    right: -26px; bottom: 0;
+    width: 380px; height: 440px;
+    fill: var(--noir);
+  }
+
+  .liste {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: repeat(4, 1fr);
+    gap: 10px;
+    padding: 10px;
+    background: var(--noir);
+  }
+  .agent {
+    display: flex; align-items: center; gap: 20px;
+    padding-right: 12px;
+    background: #1f1d19;
+    color: var(--blanc);
+  }
+  .agent b {
+    flex: none;
+    width: 92px; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--or);
+    color: var(--noir);
+    font-size: 72px;
+    font-weight: 800;
+    line-height: 1;
+  }
+  .agent span {
+    font-size: 50px;
+    font-weight: 700;
+    line-height: 1;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .appel {
+    padding: 20px 20px 22px;
+    background: var(--rouge);
+    color: var(--blanc);
+    text-align: center;
+    font-weight: 800;
+    text-transform: uppercase;
+  }
+  .appel strong { display: block; font-size: 72px; line-height: 1; font-weight: 800; }
+  .appel small { display: block; margin-top: 6px; font-size: 30px; line-height: 1; font-weight: 600; letter-spacing: .03em; }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="agent" viewBox="0 0 200 234" preserveAspectRatio="xMidYMax meet">
+    <path d="M62 66c2-24 10-42 21-42 7 0 11 5 17 5s10-5 17-5c11 0 19 18 21 42 10 2 19 6 23 10 3 3 1 6-3 6-24 3-92 3-116 0-4 0-6-3-3-6 4-4 13-8 23-10z"/>
+    <path d="M71 80h58c1 8 1 18-1 27-3 17-14 30-28 30s-25-13-28-30c-2-9-2-19-1-27z"/>
+    <path d="M84 132l16 16 16-16 8-3 12 28 24 10c17 7 26 20 28 38l4 29H12l4-29c2-18 11-31 28-38l24-10 12-28z"/>
+  </symbol>
+</svg>
+
+<main>
+  <section class="haut">
+    <p class="surtitre">AGENTS SECRETS · AWARDS 2026</p>
+    <h1>
+      <span class="petit">Qui sera</span>
+      <span class="grand">l'agent</span>
+      <span class="moyen">de l'année ?</span>
+    </h1>
+    <svg class="silhouette"><use href="#agent"/></svg>
+  </section>
+
+  <section class="liste">
+    <div class="agent"><b>1</b><span>Arsene Sefu</span></div>
+    <div class="agent"><b>2</b><span>Audrey Audra</span></div>
+    <div class="agent"><b>3</b><span>Jean Mkb</span></div>
+    <div class="agent"><b>4</b><span>jenokal_31</span></div>
+    <div class="agent"><b>5</b><span>Jess Kb</span></div>
+    <div class="agent"><b>6</b><span>Kenny</span></div>
+    <div class="agent"><b>7</b><span>Lionel</span></div>
+    <div class="agent"><b>8</b><span>Wilfried Musanzi</span></div>
+  </section>
+
+  <section class="appel">
+    <strong>À toi de voter !</strong>
+    <small>Réponds avec le numéro de ton agent</small>
+  </section>
+</main>
+</body>
+</html>

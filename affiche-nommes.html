@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Agent de l'année 2026 – Les nommés</title>
+<style>
+  :root { --noir: #0c0b09; --ombre: #1b1812; --or: #d9b45b; --blanc: #f4efe4; --filet: #3a3323; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1080px; height: 1350px; overflow: hidden; background: var(--noir); }
+  main {
+    position: relative;
+    width: 1080px; height: 1350px;
+    padding: 84px 76px 76px;
+    display: flex; flex-direction: column;
+    background: var(--noir);
+    color: var(--blanc);
+  }
+  .silhouette {
+    position: absolute; right: -150px; bottom: 0;
+    width: 800px; height: 936px;
+    fill: var(--ombre);
+  }
+  header, ul, footer { position: relative; }
+  .nommes {
+    font: 600 27px/1 "Avenir Next", sans-serif;
+    letter-spacing: .3em;
+    color: var(--or);
+  }
+  h1 {
+    margin-top: 20px;
+    font: 400 112px/1 "Didot", serif;
+    white-space: nowrap;
+  }
+  ul { list-style: none; flex: 1; margin-top: 56px; display: flex; flex-direction: column; }
+  li {
+    flex: 1;
+    width: 620px;
+    display: flex; align-items: center;
+    border-top: 1px solid var(--filet);
+    font: 400 52px/1 "Didot", serif;
+  }
+  li:last-child { border-bottom: 1px solid var(--filet); }
+  footer {
+    margin-top: 48px;
+    font: 600 27px/1 "Avenir Next", sans-serif;
+    letter-spacing: .3em;
+    color: var(--or);
+  }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="agent" viewBox="0 0 200 234" preserveAspectRatio="xMidYMax meet">
+    <path d="M62 66c2-24 10-42 21-42 7 0 11 5 17 5s10-5 17-5c11 0 19 18 21 42 10 2 19 6 23 10 3 3 1 6-3 6-24 3-92 3-116 0-4 0-6-3-3-6 4-4 13-8 23-10z"/>
+    <path d="M71 80h58c1 8 1 18-1 27-3 17-14 30-28 30s-25-13-28-30c-2-9-2-19-1-27z"/>
+    <path d="M84 132l16 16 16-16 8-3 12 28 24 10c17 7 26 20 28 38l4 29H12l4-29c2-18 11-31 28-38l24-10 12-28z"/>
+  </symbol>
+</svg>
+<main>
+  <svg class="silhouette"><use href="#agent"/></svg>
+  <header>
+    <p class="nommes">LES NOMMÉS</p>
+    <h1>Agent de l'année</h1>
+  </header>
+  <ul>
+    <li>Arsene Sefu</li>
+    <li>Audrey Audra</li>
+    <li>Jean Mkb</li>
+    <li>jenokal_31</li>
+    <li>Jess Kb</li>
+    <li>Kenny</li>
+    <li>Lionel</li>
+    <li>Wilfried Musanzi</li>
+  </ul>
+  <footer>VENDREDI 6 NOVEMBRE 2026</footer>
+</main>
+</body>
+</html>

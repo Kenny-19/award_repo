@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Résultats – Agent de l'année</title>
+<style>
+  :root { --noir: #0c0b09; --ombre: #1b1812; --filet: #3a3323; --or: #d9b45b; --blanc: #f4efe4; --doux: #b5ad9b; color-scheme: dark; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  [hidden] { display: none !important; }
+  body {
+    background: var(--noir); color: var(--blanc); font: 400 18px/1.4 "Avenir Next", "Segoe UI", sans-serif;
+    padding-block: 36px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+  main { max-width: 560px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
+  h1 { font: 400 40px/1.1 Didot, "Times New Roman", serif; color: var(--or); }
+  h2 { margin-top: 12px; font: 400 26px/1.2 Didot, "Times New Roman", serif; }
+  form { display: flex; flex-direction: column; gap: 10px; }
+  input, button { min-height: 52px; padding: 10px 12px; border: 0; font: inherit; }
+  input { background: var(--ombre); color: var(--blanc); border: 1px solid var(--filet); }
+  button { background: var(--or); color: var(--noir); font-weight: 600; cursor: pointer; }
+  button.discret { background: transparent; color: var(--blanc); border: 1px solid var(--filet); }
+  ol, ul { list-style: none; border-top: 1px solid var(--filet); }
+  li { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--filet); }
+  li b { color: var(--or); font-weight: 600; font-variant-numeric: tabular-nums; text-align: right; }
+  .actions { display: flex; flex-direction: column; gap: 10px; }
+  :focus-visible { outline: 3px solid var(--or); outline-offset: 2px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Résultats</h1>
+  <form id="formulaire">
+    <label for="cle">Clé des résultats</label>
+    <input id="cle" type="password" autocomplete="off" required>
+    <button>Afficher</button>
+  </form>
+  <p id="message" role="status"></p>
+  <div id="detail" hidden>
+    <div class="actions">
+      <p id="etat"></p>
+      <button id="reveler"></button>
+      <button id="confirmer" hidden></button>
+      <button id="annuler" class="discret" hidden>Annuler</button>
+    </div>
+    <h2 id="titre-classement">Agent de l'année</h2>
+    <ol id="classement"></ol>
+    <h2 id="titre-prix">Prix spéciaux</h2>
+    <ul id="prix"></ul>
+  </div>
+</main>
+<script>
+  const $ = (id) => document.getElementById(id);
+  let revele = false;
+
+  async function appel(chemin, corps) {
+    const reponse = await fetch(chemin, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(corps),
+    });
+    const donnees = await reponse.json();
+    if (!reponse.ok) throw new Error(donnees.erreur);
+    return donnees;
+  }
+  function ligne(gauche, droite) {
+    const li = document.createElement("li");
+    const a = document.createElement("span");
+    a.textContent = gauche;
+    const b = document.createElement("b");
+    b.textContent = droite;
+    li.append(a, b);
+    return li;
+  }
+
+  async function charger() {
+    $("message").textContent = "Chargement...";
+    try {
+      const d = await appel("/api/resultats", { cle: $("cle").value });
+      revele = d.revele;
+      $("message").textContent = "";
+      $("etat").textContent = revele
+        ? "La révélation est publique : le vote est fermé."
+        : "Les résultats sont cachés : le vote est ouvert.";
+      $("reveler").textContent = revele ? "Cacher à nouveau les résultats" : "Lancer la révélation";
+      $("confirmer").textContent = revele ? "Oui, cacher et rouvrir le vote" : "Oui, tout révéler et fermer le vote";
+      $("reveler").hidden = false;
+      $("confirmer").hidden = true;
+      $("annuler").hidden = true;
+      $("titre-classement").textContent = `Agent de l'année : ${d.total} vote(s)`;
+      $("titre-prix").textContent = `Prix spéciaux : ${d.bulletins} bulletin(s) sur 8`;
+      $("classement").replaceChildren(...d.classement.map((c) => ligne(`${c.rang}. ${c.nom}`, `${c.votes} vote(s)`)));
+      $("prix").replaceChildren(...d.prix.map((p) => ligne(p.nom, p.gagnants.join(", ") || "Aucun vote")));
+      $("detail").hidden = false;
+    } catch (erreur) {
+      $("message").textContent = erreur.message || "Impossible de charger les résultats.";
+    }
+  }
+
+  $("formulaire").addEventListener("submit", (e) => { e.preventDefault(); charger(); });
+  $("reveler").addEventListener("click", () => {
+    $("reveler").hidden = true;
+    $("confirmer").hidden = false;
+    $("annuler").hidden = false;
+  });
+  $("annuler").addEventListener("click", () => {
+    $("reveler").hidden = false;
+    $("confirmer").hidden = true;
+    $("annuler").hidden = true;
+  });
+  $("confirmer").addEventListener("click", async () => {
+    try {
+      await appel("/api/reveler", { cle: $("cle").value, revele: !revele });
+      await charger();
+    } catch (erreur) {
+      $("message").textContent = erreur.message || "L'action a échoué.";
+    }
+  });
+</script>
+</body>
+</html>
