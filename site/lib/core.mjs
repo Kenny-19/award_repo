@@ -187,6 +187,22 @@ async function groupeVerifier(request, store, env) {
   });
 }
 
+// Classement en direct : seulement pour ceux qui ont déjà voté.
+async function direct(request, store, env) {
+  const cookies = request.headers.get("cookie") || "";
+  let autorise = cookies.split(/;\s*/).some((c) => c.startsWith(`${COOKIE}=`));
+  if (!autorise) {
+    const agent = await agentDuCode((await lireCorps(request)).code, env);
+    autorise = Boolean(agent) && (await bulletinComplet(store, agent.numero));
+  }
+  if (!autorise) return json(403, { erreur: "Vote d'abord pour voir le classement." });
+  const liste = await classement(store);
+  return json(200, {
+    revele: await estRevele(store),
+    classement: liste.map(({ nom, points, rang }) => ({ nom, points, rang })),
+  });
+}
+
 async function groupeVote(request, store, env) {
   const { code, choix } = await lireCorps(request);
   const agent = await agentDuCode(code, env);
@@ -253,6 +269,7 @@ export async function handleApi(request, store, env) {
   if (request.method !== "POST") return json(405, { erreur: "Méthode non autorisée." });
   switch (pathname) {
     case "/api/vote": return vote(request, store, env);
+    case "/api/direct": return direct(request, store, env);
     case "/api/groupe/verifier": return groupeVerifier(request, store, env);
     case "/api/groupe/vote": return groupeVote(request, store, env);
     case "/api/resultats": return resultats(request, store, env);

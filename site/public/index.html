@@ -167,9 +167,14 @@
       <div class="merci" id="merci" hidden>
         <h3>Vote reçu</h3>
         <p id="merci-texte"></p>
-        <p>Résultats ici même le vendredi 6 novembre 2026. D'ici là, ton agent a besoin de renforts.</p>
+        <p>Résultat officiel le vendredi 6 novembre 2026. D'ici là, ton agent a besoin de renforts.</p>
         <a class="bouton" id="partager" target="_blank" rel="noopener">Partager sur WhatsApp</a>
         <button class="bouton discret" id="copier">Copier le lien</button>
+        <div id="direct-bloc" hidden>
+          <h3>Classement en direct</h3>
+          <p class="intro">Mis à jour automatiquement. Une voix du public vaut 1 point. Le top 5 de chaque agent rapporte 10, 7, 5, 3 et 1 points.</p>
+          <div id="direct" style="margin-top:14px;border-top:1px solid var(--filet)"></div>
+        </div>
       </div>
     </section>
 
@@ -279,6 +284,39 @@
     $("merci-texte").textContent = nom ? `Ton vote pour ${nom} est enregistré.` : "Ton vote est déjà enregistré.";
     const texte = `Qui sera l'agent de l'année 2026 ? 8 agents, un seul titre. Vote ici : ${location.origin}`;
     $("partager").href = "https://wa.me/?text=" + encodeURIComponent(texte);
+    demarrerDirect();
+  }
+
+  let minuteurDirect = null;
+
+  async function actualiserDirect() {
+    if (document.hidden) return;
+    try {
+      const reponse = await fetch("/api/direct", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: "{}",
+      });
+      if (!reponse.ok) return;
+      const d = await reponse.json();
+      if (d.revele) { clearInterval(minuteurDirect); location.reload(); return; }
+      $("direct-bloc").hidden = false;
+      $("direct").replaceChildren(...d.classement.map((c) => {
+        const egalite = d.classement.filter((x) => x.rang === c.rang).length > 1;
+        return element("div", { className: "rang" },
+          element("b", { textContent: nomRang(c.rang) + (egalite ? " ex æquo" : "") }),
+          element("strong", { textContent: c.nom }),
+          element("span", { textContent: nbPoints(c.points) }));
+      }));
+    } catch {
+      // On garde le dernier classement affiché et on réessaie au prochain passage.
+    }
+  }
+
+  function demarrerDirect() {
+    clearInterval(minuteurDirect);
+    actualiserDirect();
+    minuteurDirect = setInterval(actualiserDirect, 10000);
   }
 
   $("voter").addEventListener("click", async () => {
