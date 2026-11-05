@@ -23,7 +23,7 @@ export const PRIX = [
 
 const BAREME = [10, 7, 5, 3, 1];
 
-const COOKIE = "agent_annee_vote";
+const COOKIE = "agent_annee_vote_officiel";
 const UN_AN = 60 * 60 * 24 * 365;
 // Assez haut pour les réseaux mobiles, où beaucoup de gens partagent la même adresse IP.
 const MAX_VOTES_PAR_IP = 50;
