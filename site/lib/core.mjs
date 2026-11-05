@@ -132,25 +132,26 @@ async function vote(request, store, env) {
 
 async function etat(store) {
   if (!(await estRevele(store))) return json(200, { revele: false });
+  // Version publique : le classement seulement. Les prix spéciaux restent dans l'espace agents.
   const liste = await classement(store);
-  const { prix } = await prixSpeciaux(store);
   return json(200, {
     revele: true,
     total: liste.reduce((somme, c) => somme + c.votes, 0),
     classement: liste,
-    prix,
   });
 }
 
 async function groupeVerifier(request, store, env) {
   const agent = await agentDuCode((await lireCorps(request)).code, env);
   if (!agent) return json(401, { erreur: "Ce code n'est pas valide." });
+  const ferme = await estRevele(store);
   return json(200, {
     agent,
     agents: AGENTS,
     prix: PRIX,
     deja: (await store.get(`bulletins/${agent.numero}`)) !== null,
-    ferme: await estRevele(store),
+    ferme,
+    laureats: ferme ? (await prixSpeciaux(store)).prix : [],
   });
 }
 

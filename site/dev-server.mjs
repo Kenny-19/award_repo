@@ -30,7 +30,8 @@ createServer(async (req, res) => {
     res.end(await reponse.text());
     return;
   }
-  const chemin = url.pathname === "/" ? "/index.html" : url.pathname;
+  // Comme sur Netlify : /agents sert agents.html.
+  const chemin = url.pathname === "/" ? "/index.html" : extname(url.pathname) ? url.pathname : `${url.pathname}.html`;
   try {
     const contenu = await readFile(join(racine, normalize(chemin)));
     res.writeHead(200, { "content-type": types[extname(chemin)] || "application/octet-stream" });

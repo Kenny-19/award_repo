@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Espace agents</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400&family=Jost:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --noir: #0c0b09; --ombre: #1b1812; --filet: #3a3323; --or: #d9b45b; --blanc: #f4efe4; --doux: #b5ad9b;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  [hidden] { display: none !important; }
+  body {
+    min-height: 100dvh;
+    background: var(--noir); color: var(--blanc); font: 400 18px/1.45 "Jost", "Avenir Next", sans-serif;
+    padding-block: 44px 40px;
+    padding-left: max(20px, env(safe-area-inset-left, 0px));
+    padding-right: max(20px, env(safe-area-inset-right, 0px));
+  }
+  main { max-width: 620px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+  .label { font-size: 14px; font-weight: 600; letter-spacing: .28em; text-transform: uppercase; color: var(--or); }
+  h1 { font: 400 clamp(42px, 11vw, 64px)/1.05 "Bodoni Moda", Didot, serif; }
+  h2 { font: 400 32px/1.1 "Bodoni Moda", Didot, serif; }
+  .doux { color: var(--doux); }
+  form, #prix, section { display: flex; flex-direction: column; gap: 16px; }
+  label { display: flex; flex-direction: column; gap: 6px; font: 400 24px/1.2 "Bodoni Moda", Didot, serif; }
+  label small { font: 400 16px/1.3 "Jost", "Avenir Next", sans-serif; color: var(--doux); }
+  input, select {
+    width: 100%; min-height: 54px; padding: 10px 12px;
+    background: var(--ombre); color: var(--blanc); border: 1px solid var(--filet);
+    font: 400 18px/1.2 "Jost", "Avenir Next", sans-serif;
+  }
+  #code { font-size: 26px; letter-spacing: .14em; text-align: center; text-transform: uppercase; }
+  button, .bouton {
+    display: block; min-height: 56px; padding: 15px 12px; border: 0; cursor: pointer;
+    background: var(--or); color: var(--noir); text-align: center; text-decoration: none;
+    font: 600 18px/1.45 "Jost", "Avenir Next", sans-serif;
+  }
+  button:disabled { background: var(--ombre); color: var(--doux); cursor: default; }
+  .discret { background: transparent; color: var(--blanc); border: 1px solid var(--filet); }
+  .lignes { list-style: none; border-top: 1px solid var(--filet); }
+  .lignes li { padding: 14px 0; border-bottom: 1px solid var(--filet); }
+  .lignes strong { display: block; font: 400 24px/1.2 "Bodoni Moda", Didot, serif; }
+  .lignes span { display: block; margin-top: 2px; font-size: 16px; color: var(--or); }
+  :focus-visible { outline: 3px solid var(--or); outline-offset: 2px; }
+</style>
+</head>
+<body>
+<main>
+  <p class="label">Espace agents</p>
+  <h1 id="titre">Entre ton code</h1>
+
+  <form id="entree" hidden>
+    <input id="code" aria-label="Ton code d'agent" autocomplete="off" autocapitalize="characters" spellcheck="false" required>
+    <button>Entrer</button>
+  </form>
+
+  <section id="bulletin-bloc" hidden>
+    <div>
+      <h2>Les prix spéciaux</h2>
+      <p class="doux">Une personne par prix. Tu ne peux voter pour toi qu'à la Mission Échouée. Ton bulletin est définitif.</p>
+    </div>
+    <form id="bulletin">
+      <div id="prix"></div>
+      <button id="envoyer">Envoyer mon bulletin</button>
+    </form>
+  </section>
+
+  <section id="fait" hidden>
+    <h2>Bulletin enregistré</h2>
+    <p class="doux">Les lauréats s'afficheront ici le vendredi 6 novembre 2026.</p>
+  </section>
+
+  <section id="laureats-bloc" hidden>
+    <h2>Les lauréats</h2>
+    <ul class="lignes" id="laureats"></ul>
+  </section>
+
+  <p id="message" role="status"></p>
+
+  <section id="actions" hidden>
+    <a class="bouton discret" href="/" id="vers-public">Voir la page Agent de l'année</a>
+    <button class="discret" id="sortir">Sortir de l'espace agents</button>
+  </section>
+</main>
+<script>
+  const DESCRIPTIONS = {
+    dossier: "La meilleure photo gênante ressortie des archives.",
+    comique: "La blague de l'année.",
+    infiltre: "Lit tout, ne répond jamais.",
+    photographe: "Documente absolument tout.",
+    mission: "Le plus gros raté de l'année.",
+    retard: "Dernière arrivée à chaque rendez-vous.",
+  };
+  const CLE = "agent-annee-code";
+  const $ = (id) => document.getElementById(id);
+  let code = "";
+  let infos = null;
+
+  function memoire(valeur) {
+    try {
+      if (valeur === undefined) return localStorage.getItem(CLE);
+      if (valeur === null) localStorage.removeItem(CLE);
+      else localStorage.setItem(CLE, valeur);
+    } catch { return null; }
+  }
+
+  async function appel(chemin, corps) {
+    const reponse = await fetch(chemin, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(corps),
+    });
+    return { ok: reponse.ok, statut: reponse.status, donnees: await reponse.json() };
+  }
+
+  function montrerEntree(message = "") {
+    $("titre").textContent = "Entre ton code";
+    for (const id of ["bulletin-bloc", "fait", "laureats-bloc", "actions"]) $(id).hidden = true;
+    $("entree").hidden = false;
+    $("message").textContent = message;
+  }
+
+  function remplirBulletin(d) {
+    $("prix").replaceChildren();
+    for (const p of d.prix) {
+      const select = document.createElement("select");
+      select.id = "prix-" + p.id;
+      select.required = true;
+      select.append(new Option("Choisir un agent", ""));
+      for (const a of d.agents) {
+        if (a.numero === d.agent.numero && !p.autoVote) continue;
+        select.append(new Option(a.nom, a.numero));
+      }
+      const description = document.createElement("small");
+      description.textContent = DESCRIPTIONS[p.id];
+      const label = document.createElement("label");
+      label.htmlFor = select.id;
+      label.append(p.nom, description, select);
+      $("prix").append(label);
+    }
+  }
+
+  function afficherEspace(d) {
+    infos = d;
+    $("titre").textContent = "Bienvenue, " + d.agent.nom;
+    $("entree").hidden = true;
+    $("message").textContent = "";
+    $("actions").hidden = false;
+    $("bulletin-bloc").hidden = d.ferme || d.deja;
+    $("fait").hidden = d.ferme || !d.deja;
+    $("laureats-bloc").hidden = !d.ferme;
+    if (!d.ferme && !d.deja) remplirBulletin(d);
+    if (d.ferme) {
+      $("laureats").replaceChildren(...d.laureats.map((p) => {
+        const li = document.createElement("li");
+        const nom = document.createElement("strong");
+        nom.textContent = p.nom;
+        const gagnant = document.createElement("span");
+        gagnant.textContent = p.gagnants.join(", ") || "Aucun vote";
+        li.append(nom, gagnant);
+        return li;
+      }));
+    }
+  }
+
+  async function entrer(saisi) {
+    $("message").textContent = "Vérification...";
+    try {
+      const { ok, statut, donnees } = await appel("/api/groupe/verifier", { code: saisi });
+      if (!ok) {
+        // Seul un code refusé est oublié : une panne passagère ne doit pas faire sortir l'agent.
+        if (statut === 401) memoire(null);
+        montrerEntree(donnees.erreur);
+        return;
+      }
+      code = saisi;
+      memoire(saisi);
+      afficherEspace(donnees);
+    } catch {
+      montrerEntree("Connexion impossible. Réessaie.");
+    }
+  }
+
+  $("entree").addEventListener("submit", (e) => {
+    e.preventDefault();
+    entrer($("code").value.trim());
+  });
+
+  $("bulletin").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const choix = {};
+    for (const p of infos.prix) choix[p.id] = Number($("prix-" + p.id).value);
+    $("envoyer").disabled = true;
+    $("message").textContent = "Envoi...";
+    try {
+      const { ok, donnees } = await appel("/api/groupe/vote", { code, choix });
+      if (ok || donnees.code === "deja_vote" || donnees.code === "ferme") {
+        await entrer(code);
+        return;
+      }
+      $("message").textContent = donnees.erreur;
+    } catch {
+      $("message").textContent = "Le bulletin n'est pas parti. Réessaie.";
+    }
+    $("envoyer").disabled = false;
+  });
+
+  $("sortir").addEventListener("click", () => {
+    memoire(null);
+    code = "";
+    $("code").value = "";
+    montrerEntree();
+  });
+
+  const enregistre = memoire();
+  if (enregistre) entrer(enregistre);
+  else montrerEntree();
+</script>
+</body>
+</html>

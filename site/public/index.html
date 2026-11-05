@@ -74,7 +74,6 @@
   .lignes li { padding: 14px 0; border-bottom: 1px solid var(--filet); }
   .lignes strong { display: block; font: 400 24px/1.2 var(--titre); }
   .lignes span { display: block; margin-top: 2px; font-size: 16px; line-height: 1.35; color: var(--doux); }
-  .lien-groupe { display: inline-block; margin-top: 18px; color: var(--or); font-weight: 500; }
 
   footer { margin-top: 40px; padding-block: 24px 36px; border-top: 1px solid var(--filet); font-size: 14px; color: var(--doux); }
 
@@ -180,13 +179,6 @@
       <ul class="lignes" id="liste-criteres"></ul>
     </section>
 
-    <section class="bloc" id="prix">
-      <p class="label">Les prix spéciaux</p>
-      <h2>Six autres dossiers</h2>
-      <p class="intro">Votés uniquement par les 8 agents, révélés avec le classement.</p>
-      <ul class="lignes" id="liste-prix"></ul>
-      <a class="lien-groupe" href="/groupe.html">Tu es un agent ? Vote ici avec ton code</a>
-    </section>
   </main>
 
   <main id="revelation" hidden>
@@ -200,11 +192,6 @@
         <button class="bouton discret" id="tout">Tout afficher</button>
         <button class="bouton discret" id="gif" hidden>Télécharger l'animation en GIF</button>
       </div>
-    </section>
-    <section class="bloc" id="revel-prix" hidden>
-      <p class="label">Les prix spéciaux</p>
-      <h2>Les lauréats</h2>
-      <ul class="lignes" id="liste-laureats"></ul>
     </section>
   </main>
 
@@ -238,14 +225,6 @@
     ["Arsenal de stickers", "Le sticker parfait, envoyé en moins de 10 secondes."],
     ["Tenue de mission", "James Bond, ou habillé dans le noir ? Les photos font foi."],
   ];
-  const PRIX = [
-    ["Dossier Compromettant", "La meilleure photo gênante ressortie des archives."],
-    ["Agent Comique", "La blague de l'année."],
-    ["L'Agent Infiltré", "Lit tout, ne répond jamais."],
-    ["Le Photographe du Service", "Documente absolument tout."],
-    ["Mission Échouée", "Le plus gros raté de l'année."],
-    ["Agent Toujours en Retard", "Dernière arrivée à chaque rendez-vous."],
-  ];
   const CLE = "agent-annee-vote";
   const $ = (id) => document.getElementById(id);
   let choix = null;
@@ -274,7 +253,6 @@
     element("li", {}, element("strong", { textContent: titre }), element("span", { textContent: texte }));
 
   CRITERES.forEach((c) => $("liste-criteres").append(ligne(c)));
-  PRIX.forEach((p) => $("liste-prix").append(ligne(p)));
 
   AGENTS.forEach((a) => {
     const bouton = element("button", { className: "agent", id: "agent-" + a.numero });
@@ -716,7 +694,6 @@
         $("suivant").hidden = true;
         $("tout").hidden = true;
         $("gif").hidden = false;
-        $("revel-prix").hidden = false;
         return;
       }
       const c = ordre[etape];
@@ -737,10 +714,6 @@
       $("revel-liste").prepend(noeud);
       bouton();
     }
-    d.prix.forEach((p) => $("liste-laureats").append(ligne([
-      p.nom,
-      p.gagnants.length ? `${p.gagnants.join(", ")} · ${nbVotes(p.votes)}` : "Aucun vote",
-    ])));
     $("suivant").addEventListener("click", () => {
       if (ordre[etape].rang !== 1) { suivant(); return; }
       // Les ex æquo à la 1re place sont sacrés ensemble.

@@ -4,8 +4,8 @@ Site de vote et affiches des Awards du groupe Agents Secrets. Révélation le ve
 
 ## Contenu
 
-- `site/public/index.html` : nommés, vote public, critères, prix spéciaux, révélation et GIF.
-- `site/public/groupe.html` : vote des prix spéciaux avec un code personnel.
+- `site/public/index.html` : version publique : nommés, vote, critères, révélation et GIF.
+- `site/public/agents.html` : espace privé des agents, avec un code personnel (lien `/agents`).
 - `site/public/resultats.html` : résultats en direct et lancement de la révélation, avec la clé secrète.
 - `site/lib/core.mjs` : règles du vote.
 - `site/netlify/functions/api.mjs` : API en ligne sur Netlify.
