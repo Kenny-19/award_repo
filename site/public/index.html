@@ -30,6 +30,8 @@
   .accueil { position: relative; overflow: hidden; padding-block: 56px 48px; border-bottom: 1px solid var(--filet); }
   .accueil > * { position: relative; }
   h1 { margin-top: 14px; font-size: clamp(50px, 13vw, 92px); line-height: 1.02; }
+  .decompte { margin-top: 20px; display: flex; flex-direction: column; gap: 4px; }
+  .decompte strong { font: 400 clamp(40px, 11vw, 64px)/1.05 var(--titre); font-variant-numeric: tabular-nums; color: var(--blanc); }
   .date { margin-top: 22px; font-size: 16px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--or); }
   .fond { position: absolute; right: -60px; bottom: 0; width: 300px; height: 350px; fill: var(--ombre); }
   @media (max-width: 560px) { .fond { width: 210px; height: 246px; right: -56px; } }
@@ -150,6 +152,10 @@
     <p class="label">Les nommés 2026</p>
     <h1>Agent de l'année</h1>
     <p class="date" id="date">Votes jusqu'au samedi 7 novembre à 16 h · Le 1er dévoilé à 23 h</p>
+    <div class="decompte" id="decompte" hidden>
+      <span class="label" id="decompte-label"></span>
+      <strong id="decompte-temps" aria-live="off"></strong>
+    </div>
   </div>
 </header>
 
@@ -742,6 +748,12 @@
       etat.classement.slice(nbAffiches).forEach(afficher);
       nbAffiches = etat.classement.length;
       $("revel-prochaine").textContent = etat.prochaine ? `Prochaine révélation à ${heureLubumbashi(etat.prochaine)}.` : "";
+      prochaineRevelation = etat.prochaine ? Date.parse(etat.prochaine) : null;
+      // Le 1er arrive à la dernière étape : une heure par place encore cachée.
+      reglerDecompte(
+        etat.prochaine ? Date.parse(etat.prochaine) + (7 - etat.etape) * 3600000 : null,
+        "L'agent de l'année dévoilé dans",
+      );
       const nouveaux = etat.classement.filter((c) => c.rang === 1);
       if (nouveaux.length && !gagnants.length) {
         gagnants = nouveaux;
@@ -757,22 +769,77 @@
     $("animation").addEventListener("click", () => sacre(gagnants));
     $("gif").addEventListener("click", () => telechargerGif(gagnants, $("gif")));
     mettreAJour(d, true);
+    rafraichirRevelation = async () => {
+      try {
+        mettreAJour(await fetch("/api/etat").then((r) => r.json()), false);
+      } catch {
+        // Pas grave : on réessaie au prochain passage.
+      }
+    };
     if (!d.termine) {
-      minuteur = setInterval(async () => {
-        if (document.hidden) return;
-        try {
-          mettreAJour(await fetch("/api/etat").then((r) => r.json()), false);
-        } catch {
-          // Pas grave : on réessaie au prochain passage.
-        }
-      }, 30000);
+      minuteur = setInterval(() => { if (!document.hidden) rafraichirRevelation(); }, 30000);
     }
   }
+
+  // --- Compte à rebours : les heures viennent du serveur, le décompte tourne dans la page. ---
+  let cibleDecompte = null;
+  let prochaineRevelation = null;
+  let rafraichirRevelation = null;
+
+  function reglerDecompte(cible, libelle) {
+    cibleDecompte = cible;
+    $("decompte-label").textContent = libelle;
+    $("decompte").hidden = !cible;
+    tic();
+  }
+
+  const deuxChiffres = (n) => String(n).padStart(2, "0");
+  function duree(ms) {
+    const s = Math.max(0, Math.ceil(ms / 1000));
+    return `${deuxChiffres(Math.floor(s / 3600))}:${deuxChiffres(Math.floor(s / 60) % 60)}:${deuxChiffres(s % 60)}`;
+  }
+
+  // Juste après une échéance, on interroge le serveur toutes les 5 secondes pendant une minute.
+  function insister(action) {
+    let essais = 0;
+    const boucle = setInterval(() => { if (++essais > 12) clearInterval(boucle); action(); }, 5000);
+    action();
+  }
+
+  async function verifierDebut() {
+    try {
+      const e = await fetch("/api/etat").then((r) => r.json());
+      if (e.revele) location.reload();
+    } catch {
+      // Pas grave : on réessaie au prochain passage.
+    }
+  }
+
+  function tic() {
+    const maintenant = Date.now();
+    if (cibleDecompte) {
+      $("decompte-temps").textContent = duree(cibleDecompte - maintenant);
+      if (cibleDecompte <= maintenant) {
+        cibleDecompte = null;
+        insister(rafraichirRevelation || verifierDebut);
+      }
+    }
+    if (prochaineRevelation) {
+      const base = $("revel-prochaine").textContent.split(" Dans ")[0];
+      $("revel-prochaine").textContent = `${base} Dans ${duree(prochaineRevelation - maintenant)}.`;
+      if (prochaineRevelation <= maintenant && rafraichirRevelation) {
+        prochaineRevelation = null;
+        insister(rafraichirRevelation);
+      }
+    }
+  }
+  setInterval(tic, 1000);
 
   fetch("/api/etat")
     .then((r) => r.json())
     .then((d) => {
       if (d.revele) { revelation(d); return; }
+      if (d.prochaine) reglerDecompte(Date.parse(d.prochaine), "Fin des votes dans");
       if (memoire()) afficherMerci(memoire());
       // Sans vote, la page n'a pas de classement à suivre : elle surveille juste le début.
       const attente = setInterval(async () => {
