@@ -12,6 +12,7 @@ const store = {
   list: async (prefix) => [...memoire.keys()].filter((k) => k.startsWith(prefix)),
   get: async (key) => memoire.get(key) ?? null,
   set: async (key, value) => void memoire.set(key, value),
+  create: async (key, value) => { if (memoire.has(key)) return false; memoire.set(key, value); return true; },
 };
 const env = { RESULTATS_CLE: "dev-local" };
 const types = { ".html": "text/html; charset=utf-8", ".png": "image/png", ".css": "text/css", ".js": "text/javascript", ".json": "application/json" };

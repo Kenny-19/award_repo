@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {handleImproving, PARTICIPANTS, LANGUAGES} from '../lib/improving.mjs';
 import {codeAgent} from '../lib/core.mjs';
 test('Public read access, protected writes, 15 languages and 10 unique assignments',async()=>{
- const memory=new Map();const store={get:async k=>memory.get(k)??null,set:async(k,v)=>{memory.set(k,v)}};
+ const memory=new Map();const store={get:async k=>memory.get(k)??null,set:async(k,v)=>{memory.set(k,v)},create:async(k,v)=>{if(memory.has(k))return false;memory.set(k,v);return true}};
  const env={RESULTATS_CLE:'local-test-secret'};
  const call=async(path,numero,data)=>{const headers=numero?{'x-agent-code':await codeAgent(numero,env)}:{};return handleImproving(new Request('https://test/api/improving/'+path,{method:data===undefined?'GET':'POST',headers,body:data===undefined?undefined:JSON.stringify(data)}),store,env);};
  const visitor=await (await call('state')).json();assert.equal(visitor.me,null);assert.equal(visitor.languages.length,15);
@@ -15,10 +15,11 @@ test('Public read access, protected writes, 15 languages and 10 unique assignmen
  assert.deepEqual((await (await call('draw',6,{})).json()).draw,draw.draw);
  const project={title:'Moteur de recherche',status:'building',problem:'Retrouver efficacement des documents dans un corpus local.',technical:'Index inversé persistant et évaluation de la pertinence sur un jeu annoté.',repo:'https://github.com/example/project',demo:'',demoUrl:''};
  assert.equal((await call('project',9,{...project,agent:6})).status,200);
- const updated=await (await call('state',6)).json();assert.equal(updated.projects[0].agent,9);
+ const rejected=await call('project',9,{...project,title:'Autre projet définitif'});assert.equal(rejected.status,409);
+ const updated=await (await call('state',6)).json();assert.equal(updated.projects[0].agent,9);assert.equal(updated.projects[0].title,project.title);
  assert.equal((await call('project',10,{...project,repo:'javascript:alert(1)'})).status,400);
  assert.equal((await call('project',10,{...project,technical:''})).status,400);
- assert.equal((await call('project',10,project)).status,200);
+ const concurrent=await Promise.all([call('project',10,project),call('project',10,{...project,title:'Projet concurrent'})]);assert.deepEqual(concurrent.map(r=>r.status).sort(),[200,409]);
  assert.equal((await (await call('state',6)).json()).projects.length,2);
  assert.equal(PARTICIPANTS.length,10);assert.equal(LANGUAGES.length,15);assert.ok(!LANGUAGES.some(l=>['go','swift'].includes(l.id)));
 });

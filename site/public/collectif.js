@@ -45,10 +45,10 @@ function render() {
     $('participants-list').append(card);
   });
   $('language-list').replaceChildren();state.languages.forEach((l,i)=>{const row=el('article','language'),content=el('div');content.append(el('h3','',l.name),el('p','',l.field+' — '+l.brief),link('Explorer le langage ↗',l.url));row.append(el('span','',String(i+1).padStart(2,'0')),content);$('language-list').append(row);});
-  $('project-form').hidden=!drawn || !state.me;
-  $('identify-project').hidden=Boolean(state.me);
-  $('project-notice').textContent=!state.me ? 'La consultation est libre. Ton code permet uniquement de gérer ton projet.' : drawn?'Annonce l’intitulé de ton projet et son objectif pour que le groupe sache à quoi s’attendre. Tu pourras modifier ta fiche ensuite.':'Le formulaire s’ouvre une fois le tirage effectué.';
   const project=state.projects.find(p=>p.agent===state.me?.numero);
+  $('project-form').hidden=!drawn || !state.me || Boolean(project);
+  $('identify-project').hidden=Boolean(state.me);
+  $('project-notice').textContent=!state.me ? 'La consultation est libre. Ton code permet de confirmer ton choix définitif.' : project ? 'Ton projet « '+project.title+' » est confirmé. Ton choix est définitif et ta fiche ne peut plus être modifiée.' : drawn?'Annonce l’intitulé de ton projet et son objectif. Un seul envoi est autorisé : après confirmation, toute la fiche sera définitive.':'Le formulaire s’ouvre une fois le tirage effectué.';
   if(project) for(const name of ['title','status','problem','technical','demo','repo','demoUrl']) $('project-form').elements[name].value=project[name]||'';
   route();
 }
@@ -58,7 +58,16 @@ $('login-form').addEventListener('submit',async e=>{e.preventDefault();$('login-
 $('logout').addEventListener('click',logout);window.addEventListener('hashchange',route);
 $('cancel-draw').addEventListener('click',()=>$('draw-dialog').close());
 $('confirm-draw').addEventListener('click',async()=>{const b=$('confirm-draw');b.disabled=true;try{state=await api('draw',{});$('draw-dialog').close();render();$('my-language').classList.add('draw-reveal');$('action-message').textContent='Le tirage est officiel. À vous de jouer.';await openDrawFilm(state);}catch(error){$('draw-dialog').close();$('action-message').textContent=error.message;}finally{b.disabled=false;}});
-$('project-form').addEventListener('submit',async e=>{e.preventDefault();$('project-submit').disabled=true;$('project-message').textContent='';const data=Object.fromEntries(new FormData(e.currentTarget));try{state=await api('project',data);render();$('project-message').textContent='Projet enregistré. Les dix agents peuvent découvrir ta fiche.';}catch(error){$('project-message').textContent=error.message;}finally{$('project-submit').disabled=false;}});
+let pendingProject=null;
+$('project-form').addEventListener('submit',e=>{e.preventDefault();pendingProject=Object.fromEntries(new FormData(e.currentTarget));$('project-confirm-summary').textContent='Intitulé : '+pendingProject.title;$('project-confirm-dialog').showModal();});
+$('project-back').addEventListener('click',()=>{$('project-confirm-dialog').close();pendingProject=null;});
+$('project-finalize').addEventListener('click',async()=>{
+  if(!pendingProject)return;
+  $('project-finalize').disabled=true;$('project-submit').disabled=true;$('project-message').textContent='';
+  try{state=await api('project',pendingProject);pendingProject=null;$('project-confirm-dialog').close();render();$('action-message').textContent='Projet confirmé définitivement. Ta fiche est désormais verrouillée.';}
+  catch(error){$('project-confirm-dialog').close();$('project-message').textContent=error.message;}
+  finally{$('project-finalize').disabled=false;$('project-submit').disabled=false;}
+});
 try{code=sessionStorage.getItem(SESSION)||'';}catch{}
 if(code)api('state').then(s=>{state=s;render();}).catch(error=>{logout();$('login-error').textContent=error.message;});
 else loadPublic();

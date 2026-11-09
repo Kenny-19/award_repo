@@ -54,7 +54,7 @@ export async function handleImproving(req, store, env) {
     return respond(200, await state(store, me));
   }
   if (!env.RESULTATS_CLE) return respond(503, { erreur: 'L’espace agents est momentanément indisponible.' });
-  if (!me) return respond(401, { erreur: 'Ton code est nécessaire pour modifier ta fiche ou lancer le tirage.' });
+  if (!me) return respond(401, { erreur: 'Ton code est nécessaire pour confirmer ton projet ou lancer le tirage.' });
   if (path === '/api/improving/draw' && req.method === 'POST') {
     if (me.numero !== 6) return respond(403, { erreur: 'Seul Kenny peut lancer le tirage commun.' });
     let draw = await readDraw(store);
@@ -67,6 +67,8 @@ export async function handleImproving(req, store, env) {
   }
   if (path === '/api/improving/project' && req.method === 'POST') {
     if (!(await readDraw(store))) return respond(409, { erreur: 'Le tirage doit être lancé avant de choisir ton projet.' });
+    const projectKey = 'improving/edition-1/projects/' + me.numero;
+    if (await store.get(projectKey)) return respond(409, { erreur: 'Ton choix de projet est définitif. Ta fiche ne peut plus être modifiée.' });
     const b = await body(req);
     const fields = { title: [5,120], problem: [20,1600], technical: [20,2400], demo: [0,800], repo: [0,300], demoUrl: [0,300] };
     const project = { agent: me.numero, updatedAt: new Date().toISOString() };
@@ -81,7 +83,8 @@ export async function handleImproving(req, store, env) {
     }
     if (!['idea','building','ready'].includes(b.status)) return respond(400, { erreur: 'Choisis un état de projet valide.' });
     project.status = b.status;
-    await store.set('improving/edition-1/projects/' + me.numero, JSON.stringify(project));
+    const created = await store.create(projectKey, JSON.stringify(project));
+    if (!created) return respond(409, { erreur: 'Ton choix de projet est définitif. Ta fiche ne peut plus être modifiée.' });
     return respond(200, await state(store, me));
   }
   return respond(405, { erreur: 'Action non disponible.' });

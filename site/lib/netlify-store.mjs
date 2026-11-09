@@ -11,5 +11,6 @@ export function storeNetlify() {
     },
     get: (key) => store.get(key),
     set: (key, value) => store.set(key, value),
+    create: async (key, value) => (await store.set(key, value, { onlyIfNew: true })).modified,
   };
 }
