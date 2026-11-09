@@ -200,6 +200,11 @@
       <p class="intro" id="revel-total"></p>
       <p class="date" id="revel-prochaine"></p>
       <div id="revel-liste" style="margin-top:24px;border-top:1px solid var(--filet)"></div>
+      <section style="margin-top:48px" aria-labelledby="prix-titre">
+        <p class="label">Les distinctions du Service</p>
+        <h2 id="prix-titre">Les prix spéciaux</h2>
+        <ul class="lignes" id="palmares-prix"></ul>
+      </section>
       <div class="revel-actions">
         <button class="bouton" id="animation" hidden>Revivre le sacre</button>
         <button class="bouton discret" id="gif" hidden>Télécharger l'animation en GIF</button>
@@ -727,6 +732,10 @@
     $("date").textContent = "Édition terminée · 7 novembre 2026";
     $("revel-titre").textContent = "Le palmarès 2026";
     $("revel-total").textContent = "Merci pour vos votes ! Retrouvez le classement final et revivez le sacre. Le score additionne les voix du public et les points des agents.";
+    for (const prix of d.prix || []) {
+      const texte = prix.gagnants.length ? prix.gagnants.join(" & ") : "Non attribué";
+      $("palmares-prix").append(ligne([prix.nom, texte + (prix.gagnants.length > 1 ? " · Ex æquo" : "")]));
+    }
     let nbAffiches = 0;
     let gagnants = [];
     let minuteur = null;
