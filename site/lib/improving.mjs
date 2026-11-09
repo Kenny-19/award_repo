@@ -4,15 +4,22 @@ export const PARTICIPANTS = [...AGENTS, { numero: 9, nom: 'Kevin Milenda' }, { n
 export const LANGUAGES = [
   { id: 'typescript', name: 'TypeScript', field: 'Applications & outils', brief: 'Types avancés, architecture applicative et expérience utilisateur.', url: 'https://www.typescriptlang.org/docs/' },
   { id: 'python', name: 'Python', field: 'Données & automatisation', brief: 'Pipelines fiables, traitement de données ou systèmes intelligents évaluables.', url: 'https://docs.python.org/3/' },
-  { id: 'go', name: 'Go', field: 'Services & concurrence', brief: 'Services réseau, concurrence et observabilité.', url: 'https://go.dev/doc/' },
+  { id: 'javascript', name: 'JavaScript', field: 'Web & applications', brief: 'Applications interactives, services Node.js et outils web.', url: 'https://developer.mozilla.org/fr/docs/Web/JavaScript' },
   { id: 'rust', name: 'Rust', field: 'Systèmes & fiabilité', brief: 'Gestion mémoire, sûreté et performances mesurées.', url: 'https://www.rust-lang.org/learn' },
   { id: 'java', name: 'Java', field: 'Architecture & backend', brief: 'Architecture modulaire, concurrence et systèmes robustes.', url: 'https://dev.java/learn/' },
   { id: 'csharp', name: 'C#', field: 'Applications & services', brief: 'Programmation asynchrone, applications ou services .NET.', url: 'https://learn.microsoft.com/dotnet/csharp/' },
   { id: 'cpp', name: 'C++', field: 'Calcul & performance', brief: 'Algorithmes, maîtrise des ressources et benchmarks.', url: 'https://isocpp.org/get-started' },
   { id: 'kotlin', name: 'Kotlin', field: 'Mobile & multiplateforme', brief: 'Coroutines, conception mobile ou services multiplateformes.', url: 'https://kotlinlang.org/docs/home.html' },
-  { id: 'swift', name: 'Swift', field: 'Applications & concurrence', brief: 'Applications ou outils serveur/CLI : aucun appareil Apple obligatoire.', url: 'https://www.swift.org/documentation/' },
+  { id: 'php', name: 'PHP', field: 'Web & backend', brief: 'Applications serveur, API et architecture web robuste.', url: 'https://www.php.net/manual/fr/' },
   { id: 'elixir', name: 'Elixir', field: 'Temps réel & résilience', brief: 'Processus, tolérance aux pannes et systèmes réactifs.', url: 'https://elixir-lang.org/learning.html' },
 ];
+LANGUAGES.push(
+  { id: 'ruby', name: 'Ruby', field: 'Applications & automatisation', brief: 'Conception expressive, applications web et outils métiers.', url: 'https://www.ruby-lang.org/fr/documentation/' },
+  { id: 'dart', name: 'Dart', field: 'Applications multiplateformes', brief: 'Applications Flutter, interfaces réactives et programmation asynchrone.', url: 'https://dart.dev/guides' },
+  { id: 'scala', name: 'Scala', field: 'Fonctionnel & données', brief: 'Modélisation typée, traitement de données et programmation fonctionnelle.', url: 'https://docs.scala-lang.org/' },
+  { id: 'r', name: 'R', field: 'Statistiques & visualisation', brief: 'Analyse reproductible, modèles statistiques et exploration des données.', url: 'https://www.r-project.org/other-docs.html' },
+  { id: 'c', name: 'C', field: 'Systèmes & ressources', brief: 'Structures de données, gestion mémoire et outils proches du système.', url: 'https://www.gnu.org/software/gnu-c-manual/' },
+);
 const respond = (status, body) => new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json', 'cache-control': 'no-store' } });
 async function body(req) { try { const value = await req.json(); return value && typeof value === 'object' && !Array.isArray(value) ? value : {}; } catch { return {}; } }
 export async function identify(req, env) {
@@ -40,11 +47,14 @@ async function state(store, me) {
   return { me, participants: PARTICIPANTS, languages: LANGUAGES, draw, projects };
 }
 export async function handleImproving(req, store, env) {
-  if (!env.RESULTATS_CLE) return respond(503, { erreur: 'L’espace agents est momentanément indisponible.' });
-  const me = await identify(req, env);
-  if (!me) return respond(401, { erreur: 'Code non reconnu. Utilise ton code personnel d’agent.' });
   const path = new URL(req.url).pathname;
-  if (path === '/api/improving/state' && req.method === 'GET') return respond(200, await state(store, me));
+  const me = await identify(req, env);
+  if (path === '/api/improving/state' && req.method === 'GET') {
+    if (req.headers.get('x-agent-code') && !me) return respond(401, { erreur: 'Code non reconnu. Utilise ton code personnel d’agent.' });
+    return respond(200, await state(store, me));
+  }
+  if (!env.RESULTATS_CLE) return respond(503, { erreur: 'L’espace agents est momentanément indisponible.' });
+  if (!me) return respond(401, { erreur: 'Ton code est nécessaire pour modifier ta fiche ou lancer le tirage.' });
   if (path === '/api/improving/draw' && req.method === 'POST') {
     if (me.numero !== 6) return respond(403, { erreur: 'Seul Kenny peut lancer le tirage commun.' });
     let draw = await readDraw(store);
