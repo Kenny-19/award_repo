@@ -6,6 +6,14 @@ let code = '', state = null;
 const STATUS = { idea: 'Cadrage', building: 'En construction', ready: 'Prêt à présenter' };
 function el(tag, cls, text) { const n = document.createElement(tag); if (cls) n.className = cls; if (text !== undefined) n.textContent = text; return n; }
 function link(text, url) { const a=el('a','',text); a.href=url; a.target='_blank'; a.rel='noopener noreferrer'; return a; }
+function frameworkList(language) {
+  const section=el('details','framework-options');
+  section.append(el('summary','','Frameworks possibles ('+language.frameworks.length+')'));
+  const list=el('ul');
+  language.frameworks.forEach(f=>{const item=el('li');item.append(link(f.name+' ↗',f.url),el('p','',f.use));list.append(item);});
+  section.append(list,el('p','framework-note','Pistes facultatives : tu restes libre de choisir un autre framework compatible, ou de travailler sans framework.'));
+  return section;
+}
 async function api(path, data) {
   const response = await fetch('/api/improving/' + path, { method: data === undefined ? 'GET' : 'POST', headers: { 'x-agent-code': code, ...(data === undefined ? {} : { 'content-type': 'application/json' }) }, body: data === undefined ? undefined : JSON.stringify(data) });
   let result; try { result = await response.json(); } catch { throw Error('Le Service ne répond pas. Réessaie dans un instant.'); }
@@ -34,7 +42,7 @@ function render() {
   if(drawn){const video=el('button','button','Voir le tirage / Télécharger la vidéo ↗');video.addEventListener('click',()=>openDrawFilm(state).catch(error=>{$('action-message').textContent=error.message;}));action.append(video);}
   const langOf=n=>state.languages.find(l=>l.id===state.draw?.assignments.find(a=>a.numero===n)?.language);
   const mine=langOf(state.me?.numero);$('my-language').hidden=!mine;
-  if(mine){const box=el('div');box.append(el('p','eyebrow','TON LANGAGE ATTRIBUÉ'),el('h3','',mine.name),el('p','',mine.brief));$('my-language').replaceChildren(box,link('Documentation officielle ↗',mine.url));}
+  if(mine){const box=el('div');box.append(el('p','eyebrow','TON LANGAGE ATTRIBUÉ'),el('h3','',mine.name),el('p','',mine.brief));if(mine.frameworks?.length)box.append(frameworkList(mine));$('my-language').replaceChildren(box,link('Documentation officielle ↗',mine.url));}
   $('participants-list').replaceChildren();
   state.participants.forEach(a=>{
     const card=el('article','participant'),top=el('div','participant-top');top.append(el('h3','',a.nom),el('span','agent-number',String(a.numero).padStart(2,'0')));card.append(top);
@@ -44,7 +52,7 @@ function render() {
     else card.append(el('p','',drawn?'Intitulé du projet à annoncer.':'En attente du tirage commun.'));
     $('participants-list').append(card);
   });
-  $('language-list').replaceChildren();state.languages.forEach((l,i)=>{const row=el('article','language'),content=el('div');content.append(el('h3','',l.name),el('p','',l.field+' — '+l.brief),link('Explorer le langage ↗',l.url));row.append(el('span','',String(i+1).padStart(2,'0')),content);$('language-list').append(row);});
+  $('language-list').replaceChildren();state.languages.forEach((l,i)=>{const row=el('article','language'),content=el('div');content.append(el('h3','',l.name),el('p','',l.field+' — '+l.brief),link('Explorer le langage ↗',l.url));if(l.frameworks?.length)content.append(frameworkList(l));row.append(el('span','',String(i+1).padStart(2,'0')),content);$('language-list').append(row);});
   const project=state.projects.find(p=>p.agent===state.me?.numero);
   $('project-form').hidden=!drawn || !state.me || Boolean(project);
   $('identify-project').hidden=Boolean(state.me);

@@ -20,6 +20,122 @@ LANGUAGES.push(
   { id: 'r', name: 'R', field: 'Statistiques & visualisation', brief: 'Analyse reproductible, modèles statistiques et exploration des données.', url: 'https://www.r-project.org/other-docs.html' },
   { id: 'c', name: 'C', field: 'Systèmes & ressources', brief: 'Structures de données, gestion mémoire et outils proches du système.', url: 'https://www.gnu.org/software/gnu-c-manual/' },
 );
+// Pistes facultatives : le langage reste attribué, le framework reste libre.
+const FRAMEWORKS = {
+  "java": [
+    {
+      "name": "Spring Boot",
+      "use": "Applications backend et API avec l’écosystème Spring.",
+      "url": "https://spring.io/projects/spring-boot/"
+    },
+    {
+      "name": "Quarkus",
+      "use": "Microservices et applications Java orientées cloud.",
+      "url": "https://quarkus.io/"
+    },
+    {
+      "name": "Micronaut",
+      "use": "Services JVM et injection de dépendances à la compilation.",
+      "url": "https://micronaut.io/"
+    }
+  ],
+  "javascript": [
+    {
+      "name": "Express",
+      "use": "API et applications serveur avec Node.js.",
+      "url": "https://expressjs.com/"
+    },
+    {
+      "name": "Fastify",
+      "use": "API Node.js avec validation des données et plugins.",
+      "url": "https://fastify.dev/"
+    },
+    {
+      "name": "Nuxt",
+      "use": "Applications web basées sur Vue, côté client et serveur.",
+      "url": "https://nuxt.com/docs"
+    },
+    {
+      "name": "SvelteKit",
+      "use": "Applications web complètes avec Svelte.",
+      "url": "https://svelte.dev/docs/kit"
+    }
+  ],
+  "python": [
+    {
+      "name": "Django",
+      "use": "Applications web avec ORM, authentification et administration.",
+      "url": "https://www.djangoproject.com/"
+    },
+    {
+      "name": "FastAPI",
+      "use": "API typées avec validation et documentation OpenAPI.",
+      "url": "https://fastapi.tiangolo.com/"
+    },
+    {
+      "name": "Flask",
+      "use": "Applications web et API avec une structure légère et extensible.",
+      "url": "https://flask.palletsprojects.com/"
+    }
+  ],
+  "typescript": [
+    {
+      "name": "Angular",
+      "use": "Applications frontend structurées en TypeScript.",
+      "url": "https://angular.dev/"
+    },
+    {
+      "name": "NestJS",
+      "use": "API et services backend modulaires sous Node.js.",
+      "url": "https://docs.nestjs.com/"
+    },
+    {
+      "name": "Next.js",
+      "use": "Applications React avec rendu serveur et fonctionnalités full-stack.",
+      "url": "https://nextjs.org/docs"
+    },
+    {
+      "name": "AdonisJS",
+      "use": "Applications backend TypeScript avec un cadre intégré.",
+      "url": "https://adonisjs.com/"
+    }
+  ],
+  "php": [
+    {
+      "name": "Laravel",
+      "use": "Applications web, API et outils métiers.",
+      "url": "https://laravel.com/"
+    },
+    {
+      "name": "Symfony",
+      "use": "Applications PHP modulaires et composants réutilisables.",
+      "url": "https://symfony.com/"
+    },
+    {
+      "name": "CodeIgniter",
+      "use": "Applications web PHP avec un framework léger.",
+      "url": "https://codeigniter.com/user_guide/"
+    }
+  ],
+  "dart": [
+    {
+      "name": "Flutter",
+      "use": "Applications mobiles, web et desktop avec Dart.",
+      "url": "https://flutter.dev/"
+    },
+    {
+      "name": "Serverpod",
+      "use": "Backend Dart et API intégrées à une application Flutter.",
+      "url": "https://docs.serverpod.dev/"
+    },
+    {
+      "name": "Dart Frog",
+      "use": "API et services backend en Dart.",
+      "url": "https://dart-frog.dev/"
+    }
+  ]
+};
+for (const language of LANGUAGES) language.frameworks = FRAMEWORKS[language.id] || [];
 const respond = (status, body) => new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json', 'cache-control': 'no-store' } });
 async function body(req) { try { const value = await req.json(); return value && typeof value === 'object' && !Array.isArray(value) ? value : {}; } catch { return {}; } }
 export async function identify(req, env) {
