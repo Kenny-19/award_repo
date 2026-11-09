@@ -1,0 +1,23 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {handleImproving, PARTICIPANTS, LANGUAGES} from '../lib/improving.mjs';
+import {codeAgent} from '../lib/core.mjs';
+test('Private access, unique common draw, persistence and project ownership',async()=>{
+ const memory=new Map();const store={get:async k=>memory.get(k)??null,set:async(k,v)=>{memory.set(k,v)}};
+ const env={RESULTATS_CLE:'local-test-secret'};
+ const call=async(path,numero,data)=>{const headers=numero?{'x-agent-code':await codeAgent(numero,env)}:{};return handleImproving(new Request('https://test/api/improving/'+path,{method:data===undefined?'GET':'POST',headers,body:data===undefined?undefined:JSON.stringify(data)}),store,env);};
+ assert.equal((await call('state')).status,401);
+ assert.equal((await call('state',9)).status,200);assert.equal((await call('state',10)).status,200);
+ assert.equal((await call('draw',9,{})).status,403);
+ const state=await (await call('state',6)).json();assert.equal(state.draw,null);
+ const draw=await (await call('draw',6,{})).json();assert.equal(draw.participants.length,10);assert.equal(draw.draw.assignments.length,10);assert.equal(new Set(draw.draw.assignments.map(a=>a.language)).size,10);
+ assert.deepEqual((await (await call('draw',6,{})).json()).draw,draw.draw);
+ const project={title:'Moteur de recherche',status:'building',problem:'Retrouver efficacement des documents dans un corpus local.',technical:'Index inversé persistant et évaluation de la pertinence sur un jeu annoté.',repo:'https://github.com/example/project',demo:'',demoUrl:''};
+ assert.equal((await call('project',9,{...project,agent:6})).status,200);
+ const updated=await (await call('state',6)).json();assert.equal(updated.projects[0].agent,9);
+ assert.equal((await call('project',10,{...project,repo:'javascript:alert(1)'})).status,400);
+ assert.equal((await call('project',10,{...project,technical:''})).status,400);
+ assert.equal((await call('project',10,project)).status,200);
+ assert.equal((await (await call('state',6)).json()).projects.length,2);
+ assert.equal(PARTICIPANTS.length,10);assert.equal(LANGUAGES.length,10);
+});

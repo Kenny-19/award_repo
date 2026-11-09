@@ -3,6 +3,7 @@ import { createServer } from "node:http";
 import { readFile } from "node:fs/promises";
 import { extname, join, normalize } from "node:path";
 import { fileURLToPath } from "node:url";
+import { handleImproving } from "./lib/improving.mjs";
 import { handleApi } from "./lib/core.mjs";
 
 const racine = join(fileURLToPath(new URL(".", import.meta.url)), "public");
@@ -13,7 +14,7 @@ const store = {
   set: async (key, value) => void memoire.set(key, value),
 };
 const env = { RESULTATS_CLE: "dev-local" };
-const types = { ".html": "text/html; charset=utf-8", ".png": "image/png" };
+const types = { ".html": "text/html; charset=utf-8", ".png": "image/png", ".css": "text/css", ".js": "text/javascript", ".json": "application/json" };
 
 createServer(async (req, res) => {
   const url = new URL(req.url, "http://localhost:8899");
@@ -31,7 +32,7 @@ createServer(async (req, res) => {
       headers: req.headers,
       body: req.method === "POST" ? Buffer.concat(morceaux) : undefined,
     });
-    const reponse = await handleApi(requete, store, env);
+    const reponse = await (url.pathname.startsWith("/api/improving/") ? handleImproving(requete, store, env) : handleApi(requete, store, env));
     res.writeHead(reponse.status, Object.fromEntries(reponse.headers));
     res.end(await reponse.text());
     return;

@@ -1,34 +1,32 @@
-# Agent de l'année 2026
+# Agents Secrets
 
-Site de vote et affiches des Awards du groupe Agents Secrets. Révélation le vendredi 6 novembre 2026.
+Espace du collectif (10 agents), hébergé sur Netlify, en crème/beige et noir.
 
-## Contenu
+- `/` : connexion par code, accueil du collectif, Improving et Divertissement.
+- `/agents` : redirection vers l’espace Improving.
+- `/awards` : archive publique des Secret Awards 2026, classement, prix spéciaux, animation et GIF.
+- `/resultats.html` : ancien contrôle Awards, protégé par la clé organisateur.
 
-- `site/public/index.html` : version publique : nommés, vote, critères, révélation et GIF.
-- `site/public/agents.html` : espace privé des agents, avec un code personnel (lien `/agents`).
-- `site/public/resultats.html` : résultats en direct et lancement de la révélation, avec la clé secrète.
-- `site/lib/core.mjs` : règles du vote.
-- `site/netlify/functions/api.mjs` : API en ligne sur Netlify.
-- `affiche-*.html` et `affiche-*.png` : affiches.
+## Improving · Édition 01
 
-## Tester en local
+10 agents, 10 langages différents. Lancement unique par Kenny ; le tirage HMAC côté serveur reste identique en cas de requêtes simultanées. Les attributions sont enregistrées, puis chaque agent choisit et décrit librement un projet. Les projets ne sont accessibles que par l’API authentifiée. Un agent ne peut modifier que sa propre fiche.
 
-```bash
+TypeScript, Python, Go, Rust, Java, C#, C++, Kotlin, Swift et Elixir : sélection éditoriale fondée sur les tendances GitHub/Stack Overflow, la diversité technique et les écosystèmes, pas un top 10 de popularité. Sources dans le site. Aucun délai ou barème de jury inventé : à définir collectivement.
+
+Les données Improving utilisent le préfixe `improving/edition-1/` dans le stockage existant. Aucun ancien vote, bulletin ou résultat Awards n’est modifié.
+
+## Développement
+
+```sh
 cd site
 node dev-server.mjs
+node --test tests/improving.test.mjs
 ```
 
-Le site s'ouvre sur http://localhost:8899. Les votes sont gardés en mémoire et la clé de test est `dev-local`.
+Serveur local : http://localhost:8899, stockage en mémoire, clé locale `dev-local`.
 
-## Mettre en ligne
+## Déploiement
 
-Le site a besoin d'un hébergeur avec un serveur : GitHub Pages seul ne peut pas enregistrer les votes.
+Le dépôt déclenche Netlify. `netlify.toml` définit `site` comme base. La variable secrète `RESULTATS_CLE` (ou l’ancien nom `RESULTAS_CLE`) doit être disponible dans les Functions.
 
-Sur Netlify, définis la variable `RESULTATS_CLE` avec une longue clé secrète. Ne la mets jamais dans ce dépôt.
-
-Pour obtenir les 8 codes personnels :
-
-```bash
-cd site
-RESULTATS_CLE=ta-cle node codes.mjs
-```
+Pour générer les 10 codes, fournir la clé via l’environnement puis lancer `node site/codes.mjs`. Ne jamais publier la clé ou les codes. Les 8 codes existants restent inchangés ; Kevin et Laurent utilisent les identifiants 9 et 10.
