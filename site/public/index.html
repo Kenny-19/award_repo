@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Agent de l'année 2026</title>
+<title>Palmarès 2026 · Agents Secrets</title>
 <meta name="description" content="8 agents, 1 seul titre. Vote pour l'agent de l'année 2026.">
-<meta property="og:title" content="Qui sera l'agent de l'année ?">
-<meta property="og:description" content="8 agents, 1 seul titre. Votes jusqu'au samedi 7 novembre 2026 à 16 h.">
+<meta property="og:title" content="Palmarès 2026 · Agents Secrets">
+<meta property="og:description" content="Kenny, Agent de l’année 2026. Découvrez le classement final et revivez le sacre.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,500&family=Jost:wght@400;500;600&display=swap">
 <style>
@@ -149,9 +149,9 @@
 <header class="accueil">
   <svg class="fond" aria-hidden="true"><use href="#agent"/></svg>
   <div class="page">
-    <p class="label">Les nommés 2026</p>
+    <p class="label">Agents Secrets · Édition 2026</p>
     <h1>Agent de l'année</h1>
-    <p class="date" id="date">Votes jusqu'au samedi 7 novembre à 16 h · Le 1er dévoilé à 23 h</p>
+    <p class="date" id="date">Édition terminée · Merci à tous les votants</p>
     <div class="decompte" id="decompte" hidden>
       <span class="label" id="decompte-label"></span>
       <strong id="decompte-temps" aria-live="off"></strong>
@@ -160,7 +160,7 @@
 </header>
 
 <div class="page">
-  <main id="contenu">
+  <main id="contenu" hidden>
     <section class="bloc" id="vote">
       <p class="label">Le vote</p>
       <h2>8 agents, un seul titre</h2>
@@ -195,19 +195,19 @@
 
   <main id="revelation" hidden>
     <section class="bloc">
-      <p class="label">La révélation</p>
-      <h2 id="revel-titre">Du dernier au premier</h2>
+      <p class="label">Les Agents Awards 2026</p>
+      <h2 id="revel-titre">Le palmarès 2026</h2>
       <p class="intro" id="revel-total"></p>
       <p class="date" id="revel-prochaine"></p>
       <div id="revel-liste" style="margin-top:24px;border-top:1px solid var(--filet)"></div>
       <div class="revel-actions">
-        <button class="bouton" id="animation" hidden>Revoir l'animation</button>
+        <button class="bouton" id="animation" hidden>Revivre le sacre</button>
         <button class="bouton discret" id="gif" hidden>Télécharger l'animation en GIF</button>
       </div>
     </section>
   </main>
 
-  <footer>Agents Secrets · Awards 2026</footer>
+  <footer>Agents Secrets · Awards 2026<br>Merci aux agents et à toutes les personnes qui ont voté.</footer>
 </div>
 
 <div class="sacre" id="sacre" role="dialog" aria-modal="true" aria-labelledby="sacre-nom" hidden>
@@ -724,8 +724,9 @@
   function revelation(d) {
     $("contenu").hidden = true;
     $("revelation").hidden = false;
-    $("date").textContent = "Samedi 7 novembre 2026";
-    $("revel-total").textContent = "Les votes sont fermés. Une voix du public vaut 1 point. Le top 5 de chaque agent rapporte 10, 7, 5, 3 et 1 points.";
+    $("date").textContent = "Édition terminée · 7 novembre 2026";
+    $("revel-titre").textContent = "Le palmarès 2026";
+    $("revel-total").textContent = "Merci pour vos votes ! Retrouvez le classement final et revivez le sacre. Le score additionne les voix du public et les points des agents.";
     let nbAffiches = 0;
     let gagnants = [];
     let minuteur = null;
@@ -835,24 +836,14 @@
   }
   setInterval(tic, 1000);
 
-  fetch("/api/etat")
-    .then((r) => r.json())
-    .then((d) => {
-      if (d.revele) { revelation(d); return; }
-      if (d.prochaine) reglerDecompte(Date.parse(d.prochaine), "Fin des votes dans");
-      if (memoire()) afficherMerci(memoire());
-      // Sans vote, la page n'a pas de classement à suivre : elle surveille juste le début.
-      const attente = setInterval(async () => {
-        if (document.hidden) return;
-        try {
-          const e = await fetch("/api/etat").then((r) => r.json());
-          if (e.revele) { clearInterval(attente); location.reload(); }
-        } catch {
-          // Pas grave : on réessaie au prochain passage.
-        }
-      }, 60000);
-    })
-    .catch(() => { if (memoire()) afficherMerci(memoire()); });
+  // Archive publique du résultat final, vérifiée après la clôture.
+  fetch("/palmares-2026.json")
+    .then((r) => { if (!r.ok) throw new Error("Palmarès indisponible"); return r.json(); })
+    .then(revelation)
+    .catch(() => {
+      $("revelation").hidden = false;
+      $("revel-total").textContent = "Le palmarès ne s’est pas chargé. Recharge la page pour réessayer.";
+    });
 </script>
 </body>
 </html>

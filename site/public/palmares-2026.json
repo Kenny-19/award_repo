@@ -1,0 +1,56 @@
+{
+  "revele": true,
+  "etape": 8,
+  "termine": true,
+  "prochaine": null,
+  "classement": [
+    {
+      "nom": "Wilfried Musanzi",
+      "points": 10,
+      "rang": 8,
+      "egalite": false
+    },
+    {
+      "nom": "jenokal_31",
+      "points": 21,
+      "rang": 7,
+      "egalite": false
+    },
+    {
+      "nom": "Lionel",
+      "points": 27,
+      "rang": 6,
+      "egalite": false
+    },
+    {
+      "nom": "Jess Kb",
+      "points": 33,
+      "rang": 5,
+      "egalite": false
+    },
+    {
+      "nom": "Jean Mkb",
+      "points": 45,
+      "rang": 4,
+      "egalite": false
+    },
+    {
+      "nom": "Audrey Audra",
+      "points": 82,
+      "rang": 3,
+      "egalite": false
+    },
+    {
+      "nom": "Arsene Sefu",
+      "points": 82,
+      "rang": 2,
+      "egalite": false
+    },
+    {
+      "nom": "Kenny",
+      "points": 92,
+      "rang": 1,
+      "egalite": false
+    }
+  ]
+}
