@@ -20,3 +20,5 @@
 .framework-options a:hover,.subnav a:hover,.archive-link:hover,.sources a:hover{color:var(--accent-ink)}
 .my-language{border-left:4px solid var(--accent)}
 .draw-status{color:var(--accent)}
+
+.challenge-schedule{display:flex;justify-content:space-between;align-items:center;gap:24px;padding:28px;margin:0 0 24px;border:1px solid var(--line);border-left:4px solid var(--accent);background:var(--white)}.challenge-schedule .eyebrow{margin-bottom:14px}.challenge-schedule h2{font-size:28px}.challenge-schedule p:not(.eyebrow){font-size:13px;line-height:1.7;color:var(--muted);margin:0}.challenge-clock{display:flex;flex-direction:column;gap:10px;flex-shrink:0}.challenge-clock>span{font-size:11px;text-transform:uppercase;letter-spacing:.08em}.challenge-clock strong{font:600 clamp(21px,2.4vw,31px) Manrope,sans-serif;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}.challenge-clock small{font-size:10px;color:var(--muted)}@media(max-width:760px){.challenge-schedule{align-items:flex-start;flex-direction:column;padding:24px}.challenge-clock{width:100%}}

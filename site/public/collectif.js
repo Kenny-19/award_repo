@@ -85,3 +85,15 @@ if(code)api('state').then(s=>{state=s;render();}).catch(error=>{logout();$('logi
 else loadPublic();
 // Refresh shared updates without replacing the project form while someone is writing.
 setInterval(async()=>{if(!state||document.hidden||$('improving-view').hidden||$('project-form').contains(document.activeElement))return;try{const next=await api('state');if(JSON.stringify(next.draw)!==JSON.stringify(state.draw)||JSON.stringify(next.projects)!==JSON.stringify(state.projects)){const draft=new FormData($('project-form'));state=next;render();for(const [name,value]of draft)if($('project-form').elements[name])$('project-form').elements[name].value=value;}}catch{}},30000);
+
+// Calendar deadline supplied by the collective; fixed Lubumbashi offset.
+const CHALLENGE_START=Date.parse('2026-11-10T00:00:00+02:00');
+const CHALLENGE_END=Date.parse('2026-12-01T23:59:00+02:00');
+function updateChallengeClock(){
+  const now=Date.now(),before=now<CHALLENGE_START;
+  const remaining=Math.max(0,Math.floor(((before?CHALLENGE_START:CHALLENGE_END)-now)/1000));
+  $('challenge-clock-label').textContent=before?'Le challenge commence dans':remaining?'Pour terminer ton projet':'Échéance atteinte';
+  const days=Math.floor(remaining/86400),hours=Math.floor(remaining/3600)%24,minutes=Math.floor(remaining/60)%60,seconds=remaining%60;
+  $('challenge-clock').textContent=remaining?`${days}j ${String(hours).padStart(2,'0')}h ${String(minutes).padStart(2,'0')}m ${String(seconds).padStart(2,'0')}s`:'Le temps est écoulé';
+}
+updateChallengeClock();setInterval(updateChallengeClock,1000);
