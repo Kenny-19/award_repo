@@ -1,9 +1,9 @@
+import { PORTRAITS } from './portraits.js';
 import { openDrawFilm } from './draw-film.js';
 'use strict';
 const $ = id => document.getElementById(id);
 const SESSION = 'agents-secrets-session';
 let code = '', state = null;
-const PORTRAITS = { 3: '/portraits/jean-mkb.jpg', 6: '/portraits/kenny.jpg', 9: '/portraits/kevin-milenda.jpg' };
 const STATUS = { idea: 'Cadrage', building: 'En construction', ready: 'Prêt à présenter' };
 function el(tag, cls, text) { const n = document.createElement(tag); if (cls) n.className = cls; if (text !== undefined) n.textContent = text; return n; }
 function link(text, url) { const a=el('a','',text); a.href=url; a.target='_blank'; a.rel='noopener noreferrer'; return a; }

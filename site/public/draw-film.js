@@ -1,3 +1,4 @@
+import { portraitFor, loadPortrait, drawPortrait } from './portraits.js';
 // A replay of the recorded assignment, never another draw.
 const WIDTH = 720, HEIGHT = 960, INTRO = 1.6, STEP = 1.7, OUTRO = 5;
 export function filmRows(state) {
@@ -6,7 +7,7 @@ export function filmRows(state) {
     const id=state.draw.assignments.find(x=>x.numero===a.numero)?.language;
     const language=state.languages.find(l=>l.id===id);
     if(!language)throw new Error('Attribution introuvable : actualise la page.');
-    return {name:a.nom,language:language.name,title:state.projects.find(p=>p.agent===a.numero)?.title||''};
+    return {portrait:portraitFor(a.numero),name:a.nom,language:language.name,title:state.projects.find(p=>p.agent===a.numero)?.title||''};
   });
 }
 export const filmDuration = rows => INTRO + STEP * rows.length + OUTRO;
@@ -32,7 +33,7 @@ export function paintFrame(ctx,time,rows,languages) {
   } else if(phase.type==='agent'){
     const row=rows[phase.index],reveal=phase.progress>=.34;
     text(ctx,`AGENT ${String(phase.index+1).padStart(2,'0')} / ${rows.length}`,205,18,muted);
-    text(ctx,row.name,300,55);
+    if(row.image){ctx.save();ctx.beginPath();ctx.rect(45,238,112,100);ctx.clip();drawPortrait(ctx,row.image,45,238,112,100);ctx.restore();text(ctx,row.name,300,49,ink,'left',180,WIDTH-225);}else text(ctx,row.name,300,55);
     ctx.fillStyle=ink;ctx.fillRect(45,362,WIDTH-90,195);
     if(reveal){const p=Math.min(1,(phase.progress-.34)/.16);ctx.globalAlpha=p;text(ctx,row.language,482,76,lime);ctx.globalAlpha=1;}
     else { const cycle=Math.floor(phase.progress*35);text(ctx,languages[(cycle+phase.index)%languages.length].name,482,64,'#8a8d7e'); }
@@ -42,7 +43,7 @@ export function paintFrame(ctx,time,rows,languages) {
     for(let i=0;i<rows.length;i++){ctx.fillStyle=i<=phase.index?ink:'#cec6b7';ctx.fillRect(45+i*63,825,47,5);}
   }else{
     text(ctx,'Le tirage officiel.',192,48);text(ctx,'10 LANGAGES DIFFÉRENTS. À VOUS DE JOUER.',237,14,muted);
-    rows.forEach((row,i)=>{const y=304+i*48;text(ctx,row.name,y,25,ink,'left',48,335);text(ctx,row.language,y,23,ink,'right',WIDTH-48,250);ctx.strokeStyle='#d8d0c1';ctx.beginPath();ctx.moveTo(48,y+15);ctx.lineTo(WIDTH-48,y+15);ctx.stroke();});
+    rows.forEach((row,i)=>{const y=304+i*48;if(row.image)drawPortrait(ctx,row.image,48,y-27,30,36);text(ctx,row.name,y,25,ink,'left',row.image?90:48,row.image?293:335);text(ctx,row.language,y,23,ink,'right',WIDTH-48,250);ctx.strokeStyle='#d8d0c1';ctx.beginPath();ctx.moveTo(48,y+15);ctx.lineTo(WIDTH-48,y+15);ctx.stroke();});
     text(ctx,'DÉFIS LIBRES. EXIGENCE COMMUNE.',854,16,muted);
   }
   text(ctx,'AGENTS SECRETS',921,14,ink,'left',45);text(ctx,'secret-award.netlify.app',921,14,muted,'right',WIDTH-45);
@@ -51,6 +52,7 @@ let active=null;
 export async function openDrawFilm(state) {
   const rows=filmRows(state),dialog=document.getElementById('film-dialog'),canvas=document.getElementById('film-canvas');
   active?.stop();
+  await Promise.all(rows.map(async row=>{row.image=await loadPortrait(row.name);}));
   canvas.width=WIDTH;canvas.height=HEIGHT;
   const ctx=canvas.getContext('2d'),duration=filmDuration(rows);
   let frame=0,recorder=null,stream=null,exporting=false,url=null;

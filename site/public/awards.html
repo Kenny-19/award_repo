@@ -135,6 +135,17 @@
     @keyframes sacre-eclat { 0% { text-shadow: 0 0 0 transparent; } 35% { text-shadow: 0 0 34px rgba(255, 233, 170, .85); } 100% { text-shadow: 0 0 10px rgba(217, 180, 91, .25); } }
     @keyframes sacre-fin { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
   }
+  .award-portrait { object-fit: cover; object-position: 50% 25%; background: var(--ombre); }
+  .award-portrait.mini { width: 48px; height: 60px; }
+  .gagnant > .award-portrait { width: 160px; height: 190px; border: 1px solid var(--or); }
+  .sacre-agent .award-portrait { position: absolute; inset: 0; width: 100%; height: 100%; border: 1px solid var(--or); }
+  .sacre-agent .award-portrait.eteint { filter: grayscale(1) brightness(.3); }
+  .award-identity { display: flex; align-items: center; gap: 12px; min-width: 0; }
+  .award-portrait.rang-photo { width: 42px; height: 52px; flex-shrink: 0; }
+  .rang { align-items: center; }
+  .award-prize-portraits { display: flex; gap: 10px; margin-bottom: 12px; }
+  .award-portrait.prix-photo { width: 54px; height: 66px; }
+  @media(max-width:450px) { .rang { grid-template-columns: 44px 1fr auto; gap: 8px; } .rang strong { font-size: 23px; } .rang span { font-size: 13px; } .award-identity { gap: 8px; } .award-portrait.rang-photo { width: 34px; height: 44px; } }
 </style>
 </head>
 <body>
@@ -221,7 +232,8 @@
   <div class="sacre-contenu" id="sacre-contenu"></div>
 </div>
 
-<script>
+<script type="module">
+  import { portraitFor, loadPortrait, drawPortrait } from "./portraits.js";
   const AGENTS = [
     { numero: 1, nom: "Arsene Sefu", phrase: "Lewis Hamilton le Parisien" },
     { numero: 2, nom: "Audrey Audra", phrase: "Aventurier ++" },
@@ -262,6 +274,11 @@
     svg.append(use);
     return svg;
   }
+  function portrait(nom, classe = "") {
+    const src = portraitFor(nom);
+    if (!src) return silhouette(classe);
+    return element("img", { className: "award-portrait " + classe, src, alt: "Portrait de " + nom });
+  }
   const ligne = ([titre, texte]) =>
     element("li", {}, element("strong", { textContent: titre }), element("span", { textContent: texte }));
 
@@ -271,7 +288,7 @@
     const bouton = element("button", { className: "agent", id: "agent-" + a.numero });
     bouton.setAttribute("aria-pressed", "false");
     bouton.append(
-      silhouette("mini"),
+      portrait(a.nom, "mini"),
       element("div", {}, element("strong", { textContent: a.nom }), element("small", { textContent: a.phrase })),
       element("div", { className: "coche" }),
     );
@@ -528,6 +545,7 @@
 
     const echelle = 1.05, gauche = GIF_L / 2 - 100 * echelle, haut = 96;
     const dessinerAgent = (couleur) => {
+      if (scene.portrait) { drawPortrait(ctx, scene.portrait, gauche, haut, 200 * echelle, 234 * echelle); return; }
       ctx.save();
       ctx.translate(gauche, haut);
       ctx.scale(echelle, echelle);
@@ -632,7 +650,7 @@
     const scene = {
       intro: gagnants.length > 1 ? "Les agents de l'année 2026 sont" : "L'agent de l'année 2026 est",
       votes: nbPoints(gagnants[0].points),
-      nom, eclats, fin,
+      nom, eclats, fin, portrait: gagnants.length === 1 ? await loadPortrait(gagnants[0].nom) : null,
     };
 
     const palette = creerPalette();
@@ -700,7 +718,7 @@
     const fin = 3.3 + i * 0.065 + 0.5;
     contenu.style.setProperty("--fin", fin + "s");
 
-    const agent = element("div", { className: "sacre-agent" }, element("div", { className: "halo" }), silhouette("eteint"), silhouette("dore"));
+    const agent = element("div", { className: "sacre-agent" }, element("div", { className: "halo" }), portrait(gagnants[0].nom, "eteint"), portrait(gagnants[0].nom, "dore"));
     const fermer = element("button", { className: "bouton", id: "sacre-fermer", textContent: "Voir le classement" });
     const gif = element("button", { className: "bouton discret", id: "sacre-gif", textContent: "Télécharger en GIF" });
     gif.addEventListener("click", () => telechargerGif(gagnants, gif));
@@ -735,7 +753,11 @@
     $("revel-total").textContent = "Merci pour vos votes ! Retrouvez le classement final et revivez le sacre. Le score additionne les voix du public et les points des agents.";
     for (const prix of d.prix || []) {
       const texte = prix.gagnants.length ? prix.gagnants.join(" & ") : "Non attribué";
-      $("palmares-prix").append(ligne([prix.nom, texte + (prix.gagnants.length > 1 ? " · Ex æquo" : "")]));
+      const item = ligne([prix.nom, texte + (prix.gagnants.length > 1 ? " · Ex æquo" : "")]);
+      const portraits = element("div", { className: "award-prize-portraits" });
+      prix.gagnants.forEach(nom => { if (portraitFor(nom)) portraits.append(portrait(nom, "prix-photo")); });
+      if (portraits.childNodes.length) item.prepend(portraits);
+      $("palmares-prix").append(item);
     }
     let nbAffiches = 0;
     let gagnants = [];
@@ -744,13 +766,13 @@
     function afficher(c) {
       const noeud = c.rang === 1
         ? element("div", { className: "gagnant apparait" },
-            silhouette(),
+            portrait(c.nom),
             element("p", { className: "label", textContent: c.egalite ? "Agent de l'année, ex æquo" : "Agent de l'année 2026" }),
             element("strong", { textContent: c.nom }),
             element("p", { textContent: nbPoints(c.points) }))
         : element("div", { className: "rang apparait" },
             element("b", { textContent: nomRang(c.rang) + (c.egalite ? " ex æquo" : "") }),
-            element("strong", { textContent: c.nom }),
+            element("div", { className: "award-identity" }, ...(portraitFor(c.nom) ? [portrait(c.nom, "rang-photo")] : []), element("strong", { textContent: c.nom })),
             element("span", { textContent: nbPoints(c.points) }));
       $("revel-liste").prepend(noeud);
     }
