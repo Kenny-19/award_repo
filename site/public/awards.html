@@ -11,7 +11,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,500&family=Jost:wght@400;500;600&display=swap">
 <style>
   :root {
-    --noir: #0c0b09; --ombre: #1b1812; --filet: #3a3323; --or: #d9b45b; --blanc: #f4efe4; --doux: #b5ad9b;
+    --noir: #0c0b09; --ombre: #1b1812; --filet: #3a3323; --or: #f08a45; --blanc: #f4efe4; --doux: #b5ad9b;
     --titre: "Bodoni Moda", Didot, "Times New Roman", serif;
     --texte: "Jost", "Avenir Next", "Segoe UI", sans-serif;
     color-scheme: dark;
@@ -105,11 +105,11 @@
   .sacre-agent { position: relative; width: min(58vw, 260px); aspect-ratio: 200 / 234; }
   .sacre-agent svg { position: absolute; inset: 0; width: 100%; height: 100%; }
   .sacre-agent .eteint { fill: var(--ombre); }
-  .sacre-agent .dore { fill: var(--or); filter: drop-shadow(0 0 22px rgba(217, 180, 91, .45)); }
+  .sacre-agent .dore { fill: var(--or); filter: drop-shadow(0 0 22px rgba(240, 138, 69, .45)); }
   .halo {
     position: absolute; left: 50%; top: 50%; width: 170%; aspect-ratio: 1;
     translate: -50% -50%; border-radius: 50%;
-    background: radial-gradient(circle, rgba(217, 180, 91, .3), transparent 66%);
+    background: radial-gradient(circle, rgba(240, 138, 69, .3), transparent 66%);
   }
   .sacre-nom { font: 400 clamp(44px, 13vw, 84px)/1.08 var(--titre); color: var(--or); }
   .sacre-mot { display: inline-block; white-space: nowrap; }
@@ -132,7 +132,7 @@
     @keyframes sacre-halo { from { opacity: 0; scale: .4; } to { opacity: 1; scale: 1; } }
     @keyframes sacre-respire { 50% { scale: 1.1; } }
     @keyframes sacre-lettre { from { opacity: 0; transform: translateY(.5em); filter: blur(10px); } to { opacity: 1; transform: none; filter: blur(0); } }
-    @keyframes sacre-eclat { 0% { text-shadow: 0 0 0 transparent; } 35% { text-shadow: 0 0 34px rgba(255, 233, 170, .85); } 100% { text-shadow: 0 0 10px rgba(217, 180, 91, .25); } }
+    @keyframes sacre-eclat { 0% { text-shadow: 0 0 0 transparent; } 35% { text-shadow: 0 0 34px rgba(255, 233, 170, .85); } 100% { text-shadow: 0 0 10px rgba(240, 138, 69, .25); } }
     @keyframes sacre-fin { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
   }
   .award-portrait { object-fit: cover; object-position: 50% 25%; background: var(--ombre); }
@@ -392,7 +392,7 @@
     canvas.width = largeur * ratio;
     canvas.height = hauteur * ratio;
     ctx.scale(ratio, ratio);
-    const couleurs = ["#d9b45b", "#fff0bf", "#a8842f"];
+    const couleurs = ["#f08a45", "#fff0bf", "#b95824"];
     const eclats = Array.from({ length: 110 }, () => ({
       x: Math.random() * largeur,
       y: -20 - Math.random() * hauteur,
@@ -439,7 +439,7 @@
 
   // Palette noir, or, crème : toutes les couleurs de l'animation sont sur cette rampe.
   function creerPalette() {
-    const etapes = [[0, [0, 0, 0]], [181, [217, 180, 91]], [255, [244, 239, 228]]];
+    const etapes = [[0, [0, 0, 0]], [181, [240, 138, 69]], [255, [244, 239, 228]]];
     const palette = [];
     for (let i = 0; i < 256; i++) {
       const fin = i <= 181 ? 1 : 2;
@@ -530,8 +530,8 @@
     const halo = lisse(t, 3, 1.4);
     if (halo > 0) {
       const degrade = ctx.createRadialGradient(GIF_L / 2, 235, 0, GIF_L / 2, 235, 230);
-      degrade.addColorStop(0, `rgba(217,180,91,${0.3 * halo})`);
-      degrade.addColorStop(1, "rgba(217,180,91,0)");
+      degrade.addColorStop(0, `rgba(240,138,69,${0.3 * halo})`);
+      degrade.addColorStop(1, "rgba(240,138,69,0)");
       ctx.fillStyle = degrade;
       ctx.fillRect(0, 0, GIF_L, GIF_H);
     }
@@ -539,7 +539,7 @@
     ctx.textAlign = "left";
     ctx.textBaseline = "alphabetic";
     ctx.globalAlpha = lisse(t, 0.5, 1.5);
-    ctx.fillStyle = "#d9b45b";
+    ctx.fillStyle = "#f08a45";
     ctx.font = '600 15px "Jost", "Avenir Next", sans-serif';
     dessinerEspace(ctx, intro.toUpperCase(), GIF_L / 2, 72, 2 + 2.2 * lisse(t, 0.5, 1.5));
 
@@ -562,9 +562,9 @@
       ctx.beginPath();
       ctx.rect(0, haut + hauteur * (1 - monte), GIF_L, hauteur * monte);
       ctx.clip();
-      ctx.shadowColor = "rgba(217,180,91,.45)";
+      ctx.shadowColor = "rgba(240,138,69,.45)";
       ctx.shadowBlur = 18;
-      dessinerAgent("#d9b45b");
+      dessinerAgent("#f08a45");
       ctx.restore();
     }
 
@@ -580,7 +580,7 @@
         const apparition = lisse(t, debut, 0.75);
         if (apparition > 0 && lettre !== " ") {
           ctx.globalAlpha = apparition;
-          ctx.fillStyle = "#d9b45b";
+          ctx.fillStyle = "#f08a45";
           ctx.fillText(lettre, x + ctx.measureText(avant).width, yNom + numero * interligne + (1 - apparition) * 24);
         }
         avant += lettre;
@@ -637,7 +637,7 @@
       graine = (graine * 1664525 + 1013904223) >>> 0;
       return graine / 4294967296;
     };
-    const couleurs = ["#d9b45b", "#f4efe4", "#a8842f"];
+    const couleurs = ["#f08a45", "#f4efe4", "#b95824"];
     const eclats = Array.from({ length: 60 }, () => ({
       x: hasard() * GIF_L,
       depart: -10 - hasard() * GIF_H * 0.8,

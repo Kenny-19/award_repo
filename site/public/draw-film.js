@@ -23,10 +23,10 @@ function text(ctx,value,y,size=44,color='#20211e',align='center',x=WIDTH/2,maxWi
   ctx.fillText(value,x,y);
 }
 export function paintFrame(ctx,time,rows,languages) {
-  const paper='#eee7da',ink='#20211e',muted='#747569',lime='#c2cc9a';
+  const paper='#eee7da',ink='#20211e',muted='#747569',orange='#f08a45';
   ctx.globalAlpha=1;ctx.fillStyle=paper;ctx.fillRect(0,0,WIDTH,HEIGHT);
   text(ctx,'AS',88,46,ink,'left',45);text(ctx,'IMPROVING / ÉDITION 01',78,15,ink,'right',WIDTH-45);
-  ctx.strokeStyle='#cec6b7';ctx.beginPath();ctx.moveTo(45,115);ctx.lineTo(WIDTH-45,115);ctx.stroke();
+  ctx.strokeStyle=orange;ctx.beginPath();ctx.moveTo(45,115);ctx.lineTo(WIDTH-45,115);ctx.stroke();
   const phase=filmPhase(time,rows);
   if(phase.type==='intro'){
     ctx.globalAlpha=Math.min(1,time*2);text(ctx,rows.length+' participants.',340,77);text(ctx,'15 langages.',435,77);text(ctx,'Le hasard a choisi.',550,43,muted);text(ctx,'À VOUS DE CONSTRUIRE.',665,19);ctx.globalAlpha=1;
@@ -35,7 +35,7 @@ export function paintFrame(ctx,time,rows,languages) {
     text(ctx,`AGENT ${String(phase.index+1).padStart(2,'0')} / ${rows.length}`,205,18,muted);
     if(row.image){ctx.save();ctx.beginPath();ctx.rect(45,238,112,100);ctx.clip();drawPortrait(ctx,row.image,45,238,112,100);ctx.restore();text(ctx,row.name,300,49,ink,'left',180,WIDTH-225);}else text(ctx,row.name,300,55);
     ctx.fillStyle=ink;ctx.fillRect(45,362,WIDTH-90,195);
-    if(reveal){const p=Math.min(1,(phase.progress-.34)/.16);ctx.globalAlpha=p;text(ctx,row.language,482,76,lime);ctx.globalAlpha=1;}
+    if(reveal){const p=Math.min(1,(phase.progress-.34)/.16);ctx.globalAlpha=p;text(ctx,row.language,482,76,orange);ctx.globalAlpha=1;}
     else { const cycle=Math.floor(phase.progress*35);text(ctx,languages[(cycle+phase.index)%languages.length].name,482,64,'#8a8d7e'); }
     text(ctx,reveal?'LANGAGE ATTRIBUÉ':'ATTRIBUTION EN COURS',607,16,muted);
     if(row.title){text(ctx,'LE PROJET',695,14,muted);text(ctx,row.title,740,30);}
