@@ -1,6 +1,6 @@
 import { AGENTS, codeAgent } from './core.mjs';
 
-export const PARTICIPANTS = [...AGENTS, { numero: 9, nom: 'Kevin Milenda' }, { numero: 10, nom: 'Laurent Mutombo' }];
+export const PARTICIPANTS = [...AGENTS.filter(a => a.numero !== 7), { numero: 9, nom: 'Kevin Milenda' }, { numero: 10, nom: 'Laurent Mutombo' }];
 export const LANGUAGES = [
   { id: 'typescript', name: 'TypeScript', field: 'Applications & outils', brief: 'Types avancés, architecture applicative et expérience utilisateur.', url: 'https://www.typescriptlang.org/docs/' },
   { id: 'python', name: 'Python', field: 'Données & automatisation', brief: 'Pipelines fiables, traitement de données ou systèmes intelligents évaluables.', url: 'https://docs.python.org/3/' },

@@ -36,7 +36,7 @@ function render() {
   $('project-count').textContent=state.projects.length;
   const drawn=Boolean(state.draw);
   $('draw-title').textContent=drawn?'Les langages sont attribués.':'Le tirage se prépare.';
-  $('draw-description').textContent=drawn?'Dix agents, dix langages tirés parmi quinze. Cinq restent en réserve. Les attributions sont communes et définitives pour cette édition.':'Une attribution commune, sans doublon. Une fois lancé, le tirage est définitif pour cette édition.';
+  $('draw-description').textContent=drawn?'Neuf participants, neuf langages tirés parmi quinze. Six restent en réserve. Les attributions sont communes et définitives pour cette édition.':'Une attribution commune, sans doublon. Une fois lancé, le tirage est définitif pour cette édition.';
   const action=$('draw-action');action.replaceChildren();
   if(!drawn&&state.me?.numero===6) { const b=el('button','button','Lancer le tirage ↗');b.addEventListener('click',()=>$('draw-dialog').showModal());action.append(b); }
   else action.append(el('span','draw-status',drawn?'ÉDITION 01 / LANCÉE':'EN ATTENTE DU LANCEMENT'));

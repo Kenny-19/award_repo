@@ -29,7 +29,7 @@ export function paintFrame(ctx,time,rows,languages) {
   ctx.strokeStyle='#cec6b7';ctx.beginPath();ctx.moveTo(45,115);ctx.lineTo(WIDTH-45,115);ctx.stroke();
   const phase=filmPhase(time,rows);
   if(phase.type==='intro'){
-    ctx.globalAlpha=Math.min(1,time*2);text(ctx,'10 agents.',340,77);text(ctx,'15 langages.',435,77);text(ctx,'Le hasard a choisi.',550,43,muted);text(ctx,'À VOUS DE CONSTRUIRE.',665,19);ctx.globalAlpha=1;
+    ctx.globalAlpha=Math.min(1,time*2);text(ctx,rows.length+' participants.',340,77);text(ctx,'15 langages.',435,77);text(ctx,'Le hasard a choisi.',550,43,muted);text(ctx,'À VOUS DE CONSTRUIRE.',665,19);ctx.globalAlpha=1;
   } else if(phase.type==='agent'){
     const row=rows[phase.index],reveal=phase.progress>=.34;
     text(ctx,`AGENT ${String(phase.index+1).padStart(2,'0')} / ${rows.length}`,205,18,muted);
@@ -42,7 +42,7 @@ export function paintFrame(ctx,time,rows,languages) {
     else{text(ctx,'Son défi reste à annoncer.',729,26,muted);}
     for(let i=0;i<rows.length;i++){ctx.fillStyle=i<=phase.index?ink:'#cec6b7';ctx.fillRect(45+i*63,825,47,5);}
   }else{
-    text(ctx,'Le tirage officiel.',192,48);text(ctx,'10 LANGAGES DIFFÉRENTS. À VOUS DE JOUER.',237,14,muted);
+    text(ctx,'Le tirage officiel.',192,48);text(ctx,rows.length+' LANGAGES DIFFÉRENTS. À VOUS DE JOUER.',237,14,muted);
     rows.forEach((row,i)=>{const y=304+i*48;if(row.image)drawPortrait(ctx,row.image,48,y-27,30,36);text(ctx,row.name,y,25,ink,'left',row.image?90:48,row.image?293:335);text(ctx,row.language,y,23,ink,'right',WIDTH-48,250);ctx.strokeStyle='#d8d0c1';ctx.beginPath();ctx.moveTo(48,y+15);ctx.lineTo(WIDTH-48,y+15);ctx.stroke();});
     text(ctx,'DÉFIS LIBRES. EXIGENCE COMMUNE.',854,16,muted);
   }
@@ -63,7 +63,7 @@ export async function openDrawFilm(state) {
   const play=(done,force=false)=>{cancelAnimationFrame(frame);if(matchMedia('(prefers-reduced-motion: reduce)').matches&&!force){paintFrame(ctx,duration,rows,state.languages);return;}
     const start=performance.now();const tick=now=>{const time=Math.min(duration,(now-start)/1000);paintFrame(ctx,time,rows,state.languages);if(time<duration)frame=requestAnimationFrame(tick);else done?.();};frame=requestAnimationFrame(tick);
   };
-  status.textContent='Une courte vidéo, avec les dix attributions officielles et le récapitulatif final.';download.hidden=true;exportButton.disabled=false;exportButton.textContent='Préparer la vidéo';replay.disabled=false;
+  status.textContent='Une courte vidéo, avec les attributions officielles et le récapitulatif final.';download.hidden=true;exportButton.disabled=false;exportButton.textContent='Préparer la vidéo';replay.disabled=false;
   replay.onclick=()=>{if(!exporting)play();};
   document.getElementById('film-close').onclick=()=>dialog.close();
   dialog.onclose=()=>{cleanup();active=null;};
@@ -73,7 +73,7 @@ export async function openDrawFilm(state) {
     const mime=['video/mp4;codecs=avc1.42E01E','video/mp4','video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm'].find(t=>MediaRecorder.isTypeSupported(t));
     if(!mime){status.textContent='Ce navigateur ne propose pas de format vidéo compatible.';return;}
     exporting=true;exportButton.disabled=true;replay.disabled=true;download.hidden=true;
-    status.textContent='Création de la vidéo… garde cet onglet ouvert et visible pendant environ 24 secondes.';
+    status.textContent='Création de la vidéo… garde cet onglet ouvert et visible pendant environ 22 secondes.';
     const chunks=[];
     try{
       await document.fonts.ready;

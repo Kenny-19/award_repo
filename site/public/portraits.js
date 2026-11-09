@@ -1,6 +1,6 @@
 // Shared portraits supplied by the group. No substitution between agents.
-export const PORTRAITS = { 3: '/portraits/jean-mkb.jpg', 6: '/portraits/kenny.jpg', 9: '/portraits/kevin-milenda.jpg' };
-const NAMES = { 'Jean Mkb': 3, Kenny: 6, 'Kevin Milenda': 9 };
+export const PORTRAITS = { 2: '/portraits/audrey-audra.jpg', 3: '/portraits/jean-mkb.jpg', 6: '/portraits/kenny.jpg', 9: '/portraits/kevin-milenda.jpg' };
+const NAMES = { 'Audrey Audra': 2, 'Jean Mkb': 3, Kenny: 6, 'Kevin Milenda': 9 };
 export function portraitFor(agent) { return PORTRAITS[typeof agent === 'number' ? agent : NAMES[agent]] || null; }
 export async function loadPortrait(agent) {
   const src=portraitFor(agent);if(!src)return null;

@@ -1,4 +1,4 @@
-// Affiche les 10 codes personnels du collectif (anciens codes conservés).
+// Affiche les codes personnels des participants Improving (anciens codes conservés).
 // Utilisation : RESULTATS_CLE=ta-cle node codes.mjs
 import { codeAgent } from "./lib/core.mjs";
 
