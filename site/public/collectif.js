@@ -3,6 +3,7 @@ import { openDrawFilm } from './draw-film.js';
 const $ = id => document.getElementById(id);
 const SESSION = 'agents-secrets-session';
 let code = '', state = null;
+const PORTRAITS = { 3: '/portraits/jean-mkb.jpg', 6: '/portraits/kenny.jpg', 9: '/portraits/kevin-milenda.jpg' };
 const STATUS = { idea: 'Cadrage', building: 'En construction', ready: 'Prêt à présenter' };
 function el(tag, cls, text) { const n = document.createElement(tag); if (cls) n.className = cls; if (text !== undefined) n.textContent = text; return n; }
 function link(text, url) { const a=el('a','',text); a.href=url; a.target='_blank'; a.rel='noopener noreferrer'; return a; }
@@ -45,7 +46,10 @@ function render() {
   if(mine){const box=el('div');box.append(el('p','eyebrow','TON LANGAGE ATTRIBUÉ'),el('h3','',mine.name),el('p','',mine.brief));if(mine.frameworks?.length)box.append(frameworkList(mine));$('my-language').replaceChildren(box,link('Documentation officielle ↗',mine.url));}
   $('participants-list').replaceChildren();
   state.participants.forEach(a=>{
-    const card=el('article','participant'),top=el('div','participant-top');top.append(el('h3','',a.nom),el('span','agent-number',String(a.numero).padStart(2,'0')));card.append(top);
+    const card=el('article','participant'),top=el('div','participant-top'),identity=el('div','participant-identity');
+    if(PORTRAITS[a.numero]){const portrait=el('img','participant-portrait');portrait.src=PORTRAITS[a.numero];portrait.alt='Portrait de '+a.nom;portrait.loading='lazy';portrait.width=88;portrait.height=106;portrait.style.objectPosition=a.numero===9?'50% 32%':'50% 25%';identity.append(portrait);}
+    else {const initials=el('span','participant-initials',a.nom.split(' ').map(n=>n[0]).slice(0,2).join('').toUpperCase());initials.setAttribute('aria-hidden','true');identity.append(initials);}
+    identity.append(el('h3','',a.nom));top.append(identity,el('span','agent-number',String(a.numero).padStart(2,'0')));card.append(top);
     card.append(el('span','lang',langOf(a.numero)?.name||'Langage à attribuer'));
     const project=state.projects.find(p=>p.agent===a.numero);
     if(project){card.append(el('span','status-tag', ' · '+STATUS[project.status]),el('h4','',project.title),el('p','',project.problem));const detail=el('details');detail.append(el('summary','','Comprendre le projet'),el('p','',project.technical));if(project.demo)detail.append(el('p','',project.demo));const links=el('div','project-links');if(project.repo)links.append(link('Code source ↗',project.repo));if(project.demoUrl)links.append(link('Démonstration ↗',project.demoUrl));detail.append(links);card.append(detail);}
