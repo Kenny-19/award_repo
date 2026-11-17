@@ -2,3 +2,36 @@
   base = "site"
   publish = "public"
   functions = "netlify/functions"
+
+# Cache : les pages HTML sont toujours revérifiées ; les fichiers appelés avec ?v= peuvent
+# être gardés longtemps. Changer ?v= dans les pages quand on modifie un JS ou un CSS.
+[[headers]]
+  for = "/*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=86400, stale-while-revalidate=604800"
+
+[[headers]]
+  for = "/*.css"
+  [headers.values]
+    Cache-Control = "public, max-age=86400, stale-while-revalidate=604800"
+
+[[headers]]
+  for = "/portraits/*"
+  [headers.values]
+    Cache-Control = "public, max-age=2592000, stale-while-revalidate=604800"
+
+[[headers]]
+  for = "/palmares-2026.json"
+  [headers.values]
+    Cache-Control = "public, max-age=3600, stale-while-revalidate=86400"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+[[headers]]
+  for = "/partage-*.jpg"
+  [headers.values]
+    Cache-Control = "public, max-age=2592000"

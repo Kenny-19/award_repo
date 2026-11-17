@@ -1,5 +1,6 @@
-import { PORTRAITS } from './portraits.js';
-import { openDrawFilm } from './draw-film.js';
+import { PORTRAITS } from './portraits.js?v=3';
+// Le film n'est chargé qu'au moment de l'ouvrir.
+const openDrawFilm = async state => (await import('./draw-film.js?v=3')).openDrawFilm(state);
 'use strict';
 const $ = id => document.getElementById(id);
 const SESSION = 'agents-secrets-session';
@@ -33,7 +34,7 @@ function route() {
 function render() {
   $('login-view').hidden=true;$('private-view').hidden=false;$('logout').hidden=!state.me;
   $('identity').textContent=state.me ? 'Connecté · '+state.me.nom : 'Visiteur · accès libre';
-  $('project-count').textContent=state.projects.length;
+  $('project-count').textContent=state.projects.length;$('project-progress').textContent=state.projects.length+' / '+state.participants.length;$('project-bar').style.width=(state.projects.length/Math.max(1,state.participants.length)*100)+'%';
   const drawn=Boolean(state.draw);
   $('draw-title').textContent=drawn?'Les langages sont attribués.':'Le tirage se prépare.';
   $('draw-description').textContent=drawn?'Neuf participants, neuf langages tirés parmi quinze. Six restent en réserve. Les attributions sont communes et définitives pour cette édition.':'Une attribution commune, sans doublon. Une fois lancé, le tirage est définitif pour cette édition.';

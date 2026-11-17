@@ -30,3 +30,9 @@ Serveur local : http://localhost:8899, stockage en mémoire, clé locale `dev-lo
 Le dépôt déclenche Netlify. `netlify.toml` définit `site` comme base. La variable secrète `RESULTATS_CLE` (ou l’ancien nom `RESULTAS_CLE`) doit être disponible dans les Functions.
 
 Pour générer les 9 codes du challenge, fournir la clé via l’environnement puis lancer `node site/codes.mjs`. Ne jamais publier la clé ou les codes. Les anciens codes des participants restent inchangés ; Kevin et Laurent utilisent les identifiants 9 et 10.
+
+## Cache
+
+`netlify.toml` garde les JS et CSS un jour dans le navigateur, les portraits trente jours. Les pages
+appellent ces fichiers avec un numéro de version (`?v=3`) : après une modification d'un JS ou d'un CSS,
+augmenter ce numéro partout (pages HTML et `import` entre modules) pour que tout le monde reçoive la nouvelle version.

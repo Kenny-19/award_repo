@@ -7,7 +7,13 @@
 <meta name="description" content="Palmarès des Secret Awards 2026 : classement final, prix spéciaux et animation du sacre.">
 <meta property="og:title" content="Palmarès 2026 · Agents Secrets">
 <meta property="og:description" content="Kenny, Agent de l’année 2026. Découvrez le classement final et revivez le sacre.">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta property="og:image" content="https://secret-award.netlify.app/partage-awards.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,500&family=Jost:wght@400;500;600&display=swap">
 <style>
   :root {
@@ -135,6 +141,45 @@
     @keyframes sacre-eclat { 0% { text-shadow: 0 0 0 transparent; } 35% { text-shadow: 0 0 34px rgba(255, 233, 170, .85); } 100% { text-shadow: 0 0 10px rgba(240, 138, 69, .25); } }
     @keyframes sacre-fin { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
   }
+  .podium {
+    list-style: none; margin-top: 32px;
+    display: grid; grid-template-columns: 1fr 1.15fr 1fr; align-items: end; gap: 10px;
+  }
+  .marche { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 6px; min-width: 0; }
+  .marche-photo { width: 100%; max-width: 150px; aspect-ratio: 4 / 5; display: grid; place-items: end center; overflow: hidden; background: var(--ombre); }
+  .marche-photo .award-portrait, .marche-photo svg { width: 100%; height: 100%; }
+  .marche-photo svg { fill: #2c271d; }
+  .marche-1 .marche-photo { max-width: 190px; outline: 1px solid var(--or); outline-offset: 4px; }
+  .marche-1 .marche-photo svg { fill: var(--or); }
+  .marche strong { margin-top: 8px; font: 400 clamp(19px, 4.6vw, 26px)/1.1 var(--titre); overflow-wrap: anywhere; }
+  .marche-1 strong { color: var(--or); font-size: clamp(23px, 5.6vw, 32px); }
+  .marche span { font-size: 14px; color: var(--doux); font-variant-numeric: tabular-nums; }
+  .marche b {
+    width: 100%; margin-top: 8px; display: grid; place-items: center;
+    font: 400 28px/1 var(--titre); color: var(--blanc);
+    background: linear-gradient(180deg, #2a241a, #15130f); border-top: 1px solid var(--or);
+  }
+  .marche-1 b { height: 120px; font-size: 40px; color: var(--or); background: linear-gradient(180deg, #3a2a17, #15130f); }
+  .marche-2 b { height: 84px; }
+  .marche-3 b { height: 60px; }
+  @media (prefers-reduced-motion: no-preference) {
+    .marche { animation: podium-monte .8s cubic-bezier(.2, .8, .2, 1) both; }
+    .marche-3 { animation-delay: .15s; } .marche-2 { animation-delay: .3s; } .marche-1 { animation-delay: .5s; }
+    @keyframes podium-monte { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: none; } }
+  }
+  .retour {
+    position: sticky; top: 0; z-index: 5;
+    display: flex; justify-content: space-between; align-items: center; gap: 16px;
+    padding: 14px max(20px, env(safe-area-inset-right, 0px)) 14px max(20px, env(safe-area-inset-left, 0px));
+    background: #0c0b09d9; -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--filet); font-size: 14px;
+  }
+  .retour a { display: inline-flex; align-items: center; gap: 12px; min-height: 44px; color: var(--blanc); text-decoration: none; }
+  .retour a:hover span:last-child { color: var(--or); }
+  .retour-marque { font: 700 26px/1 var(--texte); letter-spacing: -.06em; }
+  .retour-marque sup { font-size: 10px; color: var(--or); letter-spacing: 0; }
+  .retour-edition { font-size: 12px; letter-spacing: .16em; text-transform: uppercase; color: var(--doux); }
+  @media (max-width: 450px) { .retour-edition { display: none; } }
   .award-portrait { object-fit: cover; object-position: 50% 25%; background: var(--ombre); }
   .award-portrait.mini { width: 48px; height: 60px; }
   .gagnant > .award-portrait { width: 160px; height: 190px; border: 1px solid var(--or); }
@@ -149,7 +194,7 @@
 </style>
 </head>
 <body>
-<nav style="padding:16px 24px;border-bottom:1px solid #3a3323;font:14px sans-serif"><a href="/#divertissement" style="color:#f4efe4;text-decoration:none">← Agents Secrets · Divertissement</a></nav>
+<nav class="retour" aria-label="Retour au collectif"><a href="/#divertissement"><span class="retour-marque">AS<sup>®</sup></span><span>← Le collectif</span></a><span class="retour-edition">Archives · Édition 2026</span></nav>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <symbol id="agent" viewBox="0 0 200 234" preserveAspectRatio="xMidYMax meet">
     <path d="M62 66c2-24 10-42 21-42 7 0 11 5 17 5s10-5 17-5c11 0 19 18 21 42 10 2 19 6 23 10 3 3 1 6-3 6-24 3-92 3-116 0-4 0-6-3-3-6 4-4 13-8 23-10z"/>
@@ -211,6 +256,7 @@
       <h2 id="revel-titre">Le palmarès 2026</h2>
       <p class="intro" id="revel-total"></p>
       <p class="date" id="revel-prochaine"></p>
+      <ol class="podium" id="podium" aria-label="Podium" hidden></ol>
       <div id="revel-liste" style="margin-top:24px;border-top:1px solid var(--filet)"></div>
       <section style="margin-top:48px" aria-labelledby="prix-titre">
         <p class="label">Les distinctions du Service</p>
@@ -233,7 +279,7 @@
 </div>
 
 <script type="module">
-  import { portraitFor, loadPortrait, drawPortrait } from "./portraits.js";
+  import { portraitFor, loadPortrait, drawPortrait } from "./portraits.js?v=3";
   const AGENTS = [
     { numero: 1, nom: "Arsene Sefu", phrase: "Lewis Hamilton le Parisien" },
     { numero: 2, nom: "Audrey Audra", phrase: "Aventurier ++" },
@@ -798,6 +844,20 @@
       }
       if (etat.termine) clearInterval(minuteur);
     }
+
+    // Podium : seulement une fois tout révélé, dans l'ordre 2e · 1er · 3e.
+    function podium(classement) {
+      const top = [...classement].sort((a, b) => a.rang - b.rang).slice(0, 3);
+      if (top.length < 3) return;
+      const marche = (c, place) => element("li", { className: "marche marche-" + place },
+        element("div", { className: "marche-photo" }, portrait(c.nom, "podium-photo")),
+        element("strong", { textContent: c.nom }),
+        element("span", { textContent: nbPoints(c.points) }),
+        element("b", { textContent: nomRang(c.rang) }));
+      $("podium").replaceChildren(marche(top[1], 2), marche(top[0], 1), marche(top[2], 3));
+      $("podium").hidden = false;
+    }
+    if (d.termine) podium(d.classement);
 
     $("animation").addEventListener("click", () => sacre(gagnants));
     $("gif").addEventListener("click", () => telechargerGif(gagnants, $("gif")));

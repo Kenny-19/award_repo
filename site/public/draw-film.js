@@ -1,4 +1,4 @@
-import { portraitFor, loadPortrait, drawPortrait } from './portraits.js';
+import { portraitFor, loadPortrait, drawPortrait } from './portraits.js?v=3';
 // A replay of the recorded assignment, never another draw.
 const WIDTH = 720, HEIGHT = 960, INTRO = 1.6, STEP = 1.7, OUTRO = 5;
 export function filmRows(state) {
